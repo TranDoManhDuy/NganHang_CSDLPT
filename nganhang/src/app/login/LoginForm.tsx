@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 export default function LoginForm() {
+  const [account_type, setAccountType] = useState("chinhanh")
   const [account_number, setAccount_number] = useState("");
   const [password, setPassword] = useState("");
   const handleLogin = async (e: React.FormEvent) => {
@@ -12,9 +13,8 @@ export default function LoginForm() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ account_number, password }),
+      body: JSON.stringify({ account_type, account_number, password }),
     });
-
     const data = await res.json();
     if (data.success) {
       console.log("Đăng nhập thành công:", data.user);
@@ -22,9 +22,23 @@ export default function LoginForm() {
       alert(data.message);
     }
   };
-
   return (
     <form onSubmit={handleLogin} className="space-y-5">
+      <div>
+        <label htmlFor="account_type" className="block text-sm font-medium text-gray-700">
+          Loại tài khoản
+        </label>
+        <select
+          id="account_type"
+          className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
+          value={account_type}
+          onChange={(e) => setAccountType(e.target.value)}
+          required
+        >
+          <option value="chinhanh">Chi nhánh</option>
+          <option value="nganhang">Ngân hàng</option>
+        </select>
+      </div>
       <div>
         <label htmlFor="account_number" className="block text-sm font-medium text-gray-700">
           Số tài khoản
