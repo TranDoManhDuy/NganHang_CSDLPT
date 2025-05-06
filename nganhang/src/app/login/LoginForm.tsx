@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 
 export default function LoginForm() {
@@ -8,7 +7,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3001/api/login", {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -17,11 +16,13 @@ export default function LoginForm() {
     });
     const data = await res.json();
     if (data.success) {
-      console.log("Đăng nhập thành công:", data.user);
+      console.log("Đăng nhập thành công:");
+      localStorage.setItem("token", JSON.stringify({access_token: data.access_token, refresh_token: data.refresh_token}))
     } else {
       alert(data.message);
     }
   };
+
   return (
     <form onSubmit={handleLogin} className="space-y-5">
       <div>
