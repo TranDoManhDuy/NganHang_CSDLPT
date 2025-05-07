@@ -23,7 +23,8 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api/auth', router);
-
+import { router1 } from './routers/test';
+app.use('/api', router1); // Đường dẫn cho các router khác
 // Khởi động server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
