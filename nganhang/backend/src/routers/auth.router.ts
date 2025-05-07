@@ -1,13 +1,8 @@
 import { Router } from "express";
-import { login } from "../controllers/auth.controller";
-// import { authenticateToken } from '../middleware/auth.middleware';
+import { login, refreshToken } from "../controllers/auth.controller";
 
-const router = Router();
-router.post('/login', login);
+const router_auth = Router();
+router_auth.post('/login', login);
+router_auth.post('/refreshToken', refreshToken)
 
-// Bảo vệ route này
-// router.get('/profile', authenticateToken, (req, res) => {
-//     res.json({ message: 'This is a protected route', user: (req as any).user });
-//   });
-
-export { router }
+export { router_auth }

@@ -3,15 +3,12 @@ import jwt from 'jsonwebtoken';
 interface JwtPayload {
     account_number: string;
     account_type: string;
-  }
-
+}
 // Middleware kiểm tra và xác thực JWT
 export const authenticateToken: RequestHandler = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
-
     // Token phải có dạng "Bearer <token>"
     const token = authHeader && authHeader.split(' ')[1];
-    
     if (!token) {
         res.status(401).json({ message: 'Access token missing' });
     } else {
@@ -31,4 +28,3 @@ export const authenticateToken: RequestHandler = (req: Request, res: Response, n
         }
     }
 };
-
