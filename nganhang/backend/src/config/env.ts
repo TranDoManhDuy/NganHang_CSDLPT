@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-export const db0Config = {
+export const dbConfig = {
   user: process.env.DB_USER_SERVER0,
   password: process.env.DB_PASSWORD_SERVER0,
   server: process.env.DB_HOST_SERVER0 || "localhost", // Use localhost if not provided

@@ -1,6 +1,6 @@
 import sql, { ConnectionPool } from "mssql";
 import dotenv from "dotenv";
-import { db0Config } from "./env";
+import { dbConfig } from "./env";
 
 let pool: ConnectionPool | null = null;
 export const connectDB = async (): Promise<ConnectionPool> => {
@@ -10,7 +10,7 @@ export const connectDB = async (): Promise<ConnectionPool> => {
       console.log("Using existing connection pool.");
       return pool;
     }
-    pool = await sql.connect(db0Config);
+    pool = await sql.connect(dbConfig);
     console.log("Connected to database.");
     return pool;
   } catch (error) {
