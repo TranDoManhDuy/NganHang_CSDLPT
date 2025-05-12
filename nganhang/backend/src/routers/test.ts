@@ -1,21 +1,19 @@
 import express, { Router, Request, Response, NextFunction } from "express";
-import { ConnectionPool } from "mssql";
-import { connectDB } from "../config/database";
-
+import { executeQuery } from "../services/executeQuery";
 const router1: Router = express.Router();
 router1.get(
-  "/getchinhanh", 
+  "/test",
   async (req: Request, res: Response, next: NextFunction) => {
-    let pool: ConnectionPool;
     try {
-      pool = await connectDB();
-      const result = await pool.request().query("SELECT * FROM CHINHANH");
-      // console.log(result.recordset);
-      res.json(result.recordset);
+      // const pool: ConnectionPool = await connectDB();
+      const query = `
+      EXECUTE [dbo].[sp_xem_tat_ca_TK] 
+      `;
+      const result = await executeQuery(query, []);
+      res.status(200).json(result);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching branches:", error);
       res.status(500).json({ error: "Internal server error" });
-    } finally {
     }
   }
 );

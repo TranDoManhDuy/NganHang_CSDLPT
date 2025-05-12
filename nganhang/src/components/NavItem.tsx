@@ -15,9 +15,10 @@ export function NavItem({
         px: 2,
         py: 1,
         cursor: "pointer",
-        bgcolor: active ? "#587196" : "transparent",
+        bgcolor: active ? "#b9b9b9" : "transparent",
         color: "white",
-      }}>
+      }}
+      onClick={handleClick}>
       <Typography>{children}</Typography>
     </Box>
   );
