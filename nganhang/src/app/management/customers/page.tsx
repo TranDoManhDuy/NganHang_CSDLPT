@@ -30,47 +30,64 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import GroupIcon from "@mui/icons-material/Group";
 
 // Import the customers-specific CSS
-import "./page.css"; // Adjust the path as necessary
+import "./page.css";
 import { NavItem } from "@/components/NavItem";
 import { FormField } from "@/components/FormField";
 import { SecondaryNavItem } from "@/components/SecondaryNavItem";
 
-import { getAllAccount, postAccount } from "@/utils/accountAPI"; // Adjust the import path as necessary
+import { getCustomers } from "@/utils/customerAPI"; // Adjust the import path as necessary
 
 import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as necessary
 
 export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
-  const [statusAdd, setStatusAdd] = useState(false);
+  const [statusAdd, setStatusAdd] = useState(0);
+  // State to hold the form data
+
   const [formData, setFormData] = useState({
     CMND: "",
-    macn: "",
+    HO: "",
+    TEN: "",
+    DIACHI: "",
+    PHAI: "",
+    NGAYCAP: "",
+    SODT: "",
+    MACN: "", // Branch code
   });
   // State to hold the list of accounts
-  const [listAccount, setListAccount] = useState([
+  const [listCustomer, setListCustomer] = useState([
     {
-      SOTK: "123456789",
       CMND: "123456789",
-      SODU: "1000000",
+      HO: "Nguyen",
+      TEN: "Van A",
+      DIACHI: "123 Street",
+      PHAI: "Nam",
+      NGAYCAP: "2023-01-01",
+      SODT: "0987654321",
       MACN: "CN001",
-      NGAYMOTK: "2023-01-01",
     },
   ]);
-  const [listAccountSearch, setListAccountSearch] = useState([
+  const [listCustomerSearch, setListCustomerSearch] = useState([
     {
-      SOTK: "123456789",
       CMND: "123456789",
-      SODU: "1000000",
+      HO: "Nguyen",
+      TEN: "Van A",
+      DIACHI: "123 Street",
+      PHAI: "Nam",
+      NGAYCAP: "2023-01-01",
+      SODT: "0987654321",
       MACN: "CN001",
-      NGAYMOTK: "2023-01-01",
     },
   ]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllAccount();
-        setListAccount(data.data);
-        setListAccountSearch(data.data);
+        const data = await getCustomers();
+        if (data) {
+          setListCustomer(data.data);
+          setListCustomerSearch(data.data);
+          return;
+        }
       } catch (error) {
         console.error("Error fetching account data:", error);
       }
@@ -107,19 +124,19 @@ export default function ManagementInterface() {
     }));
   };
   const handleSubmit = () => {
-    const { CMND, macn } = formData;
-    if (!CMND || !macn) {
-      alert("Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
-    try {
-      postAccount({ CMND, macn });
-    } catch (error) {
-      console.error("Error creating account:", error);
-    }
-    // alert("Tạo tài khoản thành công");
-    setStatusAdd(false);
-    // Perform the API call to create a new account
+    // const { CMND, macn } = formData;
+    // if (!CMND || !macn) {
+    //   alert("Vui lòng nhập đầy đủ thông tin");
+    //   return;
+    // }
+    // try {
+    //   postAccount({ CMND, macn });
+    // } catch (error) {
+    //   console.error("Error creating account:", error);
+    // }
+    // // alert("Tạo tài khoản thành công");
+    // setStatusAdd(0);
+    // // Perform the API call to create a new account
   };
   //
 
@@ -129,9 +146,8 @@ export default function ManagementInterface() {
     // history.push(path);
     // or
     // navigate(path);
-    location.href = path
+    location.href = path;
   };
-  const handleContextMenu = (event: React.MouseEvent, account: Object) => {};
   return (
     <Box
       sx={{
@@ -161,11 +177,11 @@ export default function ManagementInterface() {
           icon={<PersonIcon />}
           label="Khách hàng"
           onClick={() => handSecondaryNavItemClick("/management/customers")}
+          active
         />
         <SecondaryNavItem
           icon={<AccountBalanceIcon />}
           label="Tài khoản"
-          active
           onClick={() => handSecondaryNavItemClick("/management/accounts")}
         />
         <SecondaryNavItem
@@ -220,13 +236,13 @@ export default function ManagementInterface() {
               borderBottom: "1px solid #d0d0d0",
             }}>
             <Typography sx={{ fontWeight: 500 }}>
-              Danh sách tài khoản
+              Danh sách khách hàng
             </Typography>
             <Button
               variant="outlined"
               size="small"
-              onClick={() => setStatusAdd(true)}
-              disabled={statusAdd}
+              onClick={() => setStatusAdd(1)}
+              disabled={statusAdd != 0}
               sx={{
                 bgcolor: "white",
                 color: "black",
@@ -234,13 +250,13 @@ export default function ManagementInterface() {
                 textTransform: "none",
                 "&:hover": { borderColor: "#a0a0a0", bgcolor: "#f8f8f8" },
               }}>
-              Mở tài khoản mới
+              Thêm khách hàng mới
             </Button>
           </Box>
 
           <Box sx={{ p: 2, display: "flex", flexDirection: "column", flex: 1 }}>
             <TextField
-              placeholder="Tìm kiếm tài khoản theo số tài khoản"
+              placeholder="Tìm kiếm khách hàng theo tên, CMND..."
               size="small"
               sx={{
                 mb: 2,
@@ -257,15 +273,15 @@ export default function ManagementInterface() {
               onChange={(e) => {
                 const searchValue = e.target.value;
 
-                if (searchValue) {
-                  const filteredAccounts = listAccount.filter((account) =>
-                    account.SOTK.includes(searchValue)
-                  );
-                  setListAccount(filteredAccounts);
-                } else {
-                  // Reset to original list if search is cleared
-                  setListAccount(listAccountSearch);
-                }
+                // if (searchValue) {
+                //   const filteredAccounts = listAccount.filter((account) =>
+                //     account.SOTK.includes(searchValue)
+                //   );
+                //   setListAccount(filteredAccounts);
+                // } else {
+                //   // Reset to original list if search is cleared
+                //   setListAccount(listAccountSearch);
+                // }
               }}
             />
 
@@ -301,14 +317,6 @@ export default function ManagementInterface() {
                           border: "1px solid #d0d0d0",
                           bgcolor: "#b9b9b9",
                         }}>
-                        Số tài khoản
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 500,
-                          border: "1px solid #d0d0d0",
-                          bgcolor: "#b9b9b9",
-                        }}>
                         CMND
                       </TableCell>
                       <TableCell
@@ -317,7 +325,7 @@ export default function ManagementInterface() {
                           border: "1px solid #d0d0d0",
                           bgcolor: "#b9b9b9",
                         }}>
-                        Số dư
+                        Họ
                       </TableCell>
                       <TableCell
                         sx={{
@@ -325,7 +333,7 @@ export default function ManagementInterface() {
                           border: "1px solid #d0d0d0",
                           bgcolor: "#b9b9b9",
                         }}>
-                        Chi nhánh
+                        Tên
                       </TableCell>
                       <TableCell
                         sx={{
@@ -333,7 +341,39 @@ export default function ManagementInterface() {
                           border: "1px solid #d0d0d0",
                           bgcolor: "#b9b9b9",
                         }}>
-                        Ngày mở tài khoản
+                        Địa chỉ
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 500,
+                          border: "1px solid #d0d0d0",
+                          bgcolor: "#b9b9b9",
+                        }}>
+                        Phái
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 500,
+                          border: "1px solid #d0d0d0",
+                          bgcolor: "#b9b9b9",
+                        }}>
+                        Ngày cấp
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 500,
+                          border: "1px solid #d0d0d0",
+                          bgcolor: "#b9b9b9",
+                        }}>
+                        Số điện thoại
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 500,
+                          border: "1px solid #d0d0d0",
+                          bgcolor: "#b9b9b9",
+                        }}>
+                        Mã chi nhánh
                       </TableCell>
                       {/* <TableCell
                         sx={{
@@ -344,22 +384,37 @@ export default function ManagementInterface() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Array.from(listAccount).map((item, index) => (
-                      <TableRow key={item.SOTK}>
-                        <TableCell className="mui-table-cell">
-                          {item.SOTK}
-                        </TableCell>
+                    {Array.from(listCustomer).map((item, index) => (
+                      <TableRow
+                        key={item.CMND}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          console.log("Right-clicked on row:", item);
+                          setStatusAdd(2);
+                        }}>
                         <TableCell className="mui-table-cell">
                           {item.CMND}
                         </TableCell>
                         <TableCell className="mui-table-cell">
-                          {item.SODU}
+                          {item.HO}
+                        </TableCell>
+                        <TableCell className="mui-table-cell">
+                          {item.TEN}
+                        </TableCell>
+                        <TableCell className="mui-table-cell">
+                          {item.DIACHI}
+                        </TableCell>
+                        <TableCell className="mui-table-cell">
+                          {item.PHAI}
+                        </TableCell>
+                        <TableCell className="mui-table-cell">
+                          {item.NGAYCAP}
+                        </TableCell>
+                        <TableCell className="mui-table-cell">
+                          {item.SODT}
                         </TableCell>
                         <TableCell className="mui-table-cell">
                           {item.MACN}
-                        </TableCell>
-                        <TableCell className="mui-table-cell">
-                          {item.NGAYMOTK}
                         </TableCell>
                         {/* <TableCell className="mui-table-cell">
                           <Button
@@ -393,7 +448,7 @@ export default function ManagementInterface() {
         {/* Customer Form */}
         <form
           action={handleSubmit}
-          style={{ display: statusAdd ? "block" : "none" }}>
+          style={{ display: statusAdd == 0 ? "none" : "" }}>
           <Paper sx={{ width: 350, border: "1px solid #d0d0d0" }}>
             <Box
               sx={{
@@ -402,7 +457,8 @@ export default function ManagementInterface() {
                 borderBottom: "1px solid #d0d0d0",
               }}>
               <Typography sx={{ fontWeight: 500 }}>
-                Tạo tài khoản mới
+                {statusAdd == 1 ? "Thêm khách hàng" : ""}
+                {statusAdd == 2 ? "Hiểu chỉnh khách hàng" : ""}
               </Typography>
             </Box>
 
@@ -415,31 +471,58 @@ export default function ManagementInterface() {
                 initialValue={formData.CMND}
                 onChange={handleFieldChange}
               />
+              <FormField
+                label="Họ:"
+                type="Text"
+                name="HO"
+                initialValue={formData.HO}
+                onChange={handleFieldChange}
+              />
+              <FormField
+                label="Tên:"
+                type="Text"
+                name="TEN"
+                initialValue={formData.TEN}
+                onChange={handleFieldChange}
+              />
+              <Box>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Phái:</InputLabel>
+                  <Select
+                    label="Phái:"
+                    sx={{
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#d0d0d0",
+                      },
+                    }}
+                    onChange={handleFieldChange}>
+                    <MenuItem value="Nam">Nam</MenuItem>
+                    <MenuItem value="Nu">Nữ</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* <Box>
-              <FormControl fullWidth size="small">
-                <InputLabel>Phái:</InputLabel>
-                <Select
-                  label="Phái:"
-                  sx={{
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#d0d0d0",
-                    },
-                  }}>
-                  <MenuItem value="male">Nam</MenuItem>
-                  <MenuItem value="female">Nữ</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            <FormField label="Số điện thoại:" /> */}
+              <FormField
+                label="Địa chỉ:"
+                type="Text"
+                name="DIACHI"
+                initialValue={formData.DIACHI}
+                onChange={handleFieldChange}
+              />
+              <FormField
+                label="Số điện thoại:"
+                type="Text"
+                name="SODT"
+                initialValue={formData.SODT}
+                onChange={handleFieldChange}
+              />
 
               <Box>
                 <FormControl fullWidth size="small">
                   <InputLabel>Mã chi nhánh:</InputLabel>
                   <Select
                     defaultValue={""}
-                    value={formData.macn}
+                    // value={formData.macn}
                     label="Mã chi nhánh:"
                     onChange={(e) => handleFieldChange(e.target.value, "macn")}
                     sx={{
@@ -483,7 +566,7 @@ export default function ManagementInterface() {
                 <Button
                   variant="outlined"
                   className="button-cancel"
-                  onClick={() => setStatusAdd(false)}
+                  onClick={() => setStatusAdd(0)}
                   sx={{
                     borderColor: "#d0d0d0",
                     color: "black",

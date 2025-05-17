@@ -6,8 +6,8 @@ import cookieParser from "cookie-parser";
 import { router_auth } from "./routers/auth.router";
 import { router_customer } from "./routers/customer.router";
 import { router_account } from "./routers/account.router";
-
 import { router_branch } from "./routers/branch.router";
+// import { router_customer } from "./routers/customer.router";
 // Load biến môi trường từ .env
 dotenv.config();
 
@@ -29,13 +29,13 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", router_auth);
-app.use("/api/customer", router_customer);
+app.use("/api", router_customer);
 // import { router1 } from "./routers/test";
 // app.use("/api", router1);
 app.use("/api", router_account);
-
 app.use("/api", router_branch);
 
+// app.use("/api", (req: Request, res: Response) => {
 // Khởi động server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
