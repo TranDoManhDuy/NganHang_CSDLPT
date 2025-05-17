@@ -32,13 +32,18 @@ axiosInstance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const res = await axios.post(
-          `${API_URL}/auth/refreshToken`,
+          "http://localhost:5000/api/auth/refreshToken",
           {},
-          { withCredentials: true }
+          {
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         );
         if (res.status === 200) {
           localStorage.setItem(

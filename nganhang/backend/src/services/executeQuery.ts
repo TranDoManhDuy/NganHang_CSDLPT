@@ -7,7 +7,6 @@ export const executeQuery = async (query: string, params: any[]) => {
       request.input(param.name, param.type, param.value);
     });
     const result = await request.query(query);
-    const data = result.recordset.map((row: any) => {});
     return result.recordset;
   } catch (error) {
     console.error("Error executing query:", error);

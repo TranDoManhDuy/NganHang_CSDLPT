@@ -35,12 +35,18 @@ import { NavItem } from "@/components/NavItem";
 import { FormField } from "@/components/FormField";
 import { SecondaryNavItem } from "@/components/SecondaryNavItem";
 
-import { getAllAccount } from "@/utils/accountAPI"; // Adjust the import path as necessary
+import { getAllAccount, postAccount } from "@/utils/accountAPI"; // Adjust the import path as necessary
+
+import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as necessary
 
 export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
-  const [stausAddAccount, setStausAddAccount] = useState(false);
-
+  const [statusAdd, setStatusAdd] = useState(false);
+  const [formData, setFormData] = useState({
+    CMND: "",
+    macn: "",
+  });
+  // State to hold the list of accounts
   const [listAccount, setListAccount] = useState([
     {
       SOTK: "123456789",
@@ -50,19 +56,72 @@ export default function ManagementInterface() {
       NGAYMOTK: "2023-01-01",
     },
   ]);
-
+  const [listAccountSearch, setListAccountSearch] = useState([
+    {
+      SOTK: "123456789",
+      CMND: "123456789",
+      SODU: "1000000",
+      MACN: "CN001",
+      NGAYMOTK: "2023-01-01",
+    },
+  ]);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getAllAccount();
         setListAccount(data.data);
+        setListAccountSearch(data.data);
       } catch (error) {
         console.error("Error fetching account data:", error);
       }
     };
     fetchData();
   }, []);
-
+  // State to hold the list of branches
+  const [listBranch, setListBranch] = useState([
+    {
+      MACN: "CN001",
+      TENCN: "Chi nhánh 1",
+    },
+  ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getBranches();
+        if (data) {
+          setListBranch(data.data);
+          handleFieldChange(data.data[0].MACN, "macn"); // Set the default value for the branch field
+          return;
+        }
+      } catch (error) {
+        console.error("Error fetching branch data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+  //
+  const handleFieldChange = (value: any, fieldName: any) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [fieldName]: value,
+    }));
+  };
+  const handleSubmit = () => {
+    const { CMND, macn } = formData;
+    if (!CMND || !macn) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+    try {
+      postAccount({ CMND, macn });
+    } catch (error) {
+      console.error("Error creating account:", error);
+    }
+    // alert("Tạo tài khoản thành công");
+    setStatusAdd(false);
+    // Perform the API call to create a new account
+  };
+  const handleContextMenu = (event: React.MouseEvent, account: Object) => {};
   return (
     <Box
       sx={{
@@ -112,11 +171,11 @@ export default function ManagementInterface() {
                   borderColor: "#d0d0d0",
                 },
               }}>
-              <MenuItem value="" disabled>
-                <Typography>Chọn chi nhánh</Typography>
-              </MenuItem>
-              <MenuItem value="branch1">Chi nhánh 1</MenuItem>
-              <MenuItem value="branch2">Chi nhánh 2</MenuItem>
+              {listBranch.map((item, index) => (
+                <MenuItem key={index} value={item.MACN}>
+                  {item.TENCN}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -124,7 +183,7 @@ export default function ManagementInterface() {
 
       {/* Main Content */}
       <Box sx={{ display: "flex", flex: 1, p: 2, gap: 2 }}>
-        {/* Employee List */}
+        {/* Accounts List */}
         <Paper
           sx={{
             flex: 1,
@@ -147,6 +206,8 @@ export default function ManagementInterface() {
             <Button
               variant="outlined"
               size="small"
+              onClick={() => setStatusAdd(true)}
+              disabled={statusAdd}
               sx={{
                 bgcolor: "white",
                 color: "black",
@@ -160,7 +221,7 @@ export default function ManagementInterface() {
 
           <Box sx={{ p: 2, display: "flex", flexDirection: "column", flex: 1 }}>
             <TextField
-              placeholder="Search"
+              placeholder="Tìm kiếm tài khoản theo số tài khoản"
               size="small"
               sx={{
                 mb: 2,
@@ -173,6 +234,19 @@ export default function ManagementInterface() {
                     <SearchIcon fontSize="small" sx={{ color: "#666666" }} />
                   </InputAdornment>
                 ),
+              }}
+              onChange={(e) => {
+                const searchValue = e.target.value;
+
+                if (searchValue) {
+                  const filteredAccounts = listAccount.filter((account) =>
+                    account.SOTK.includes(searchValue)
+                  );
+                  setListAccount(filteredAccounts);
+                } else {
+                  // Reset to original list if search is cleared
+                  setListAccount(listAccountSearch);
+                }
               }}
             />
 
@@ -242,11 +316,19 @@ export default function ManagementInterface() {
                         }}>
                         Ngày mở tài khoản
                       </TableCell>
+                      {/* <TableCell
+                        sx={{
+                          fontWeight: 500,
+                          border: "1px solid #d0d0d0",
+                          bgcolor: "#b9b9b9",
+                        }}></TableCell> */}
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {Array.from(listAccount).map((item, index) => (
-                      <TableRow key={index}>
+                      <TableRow
+                        key={item.SOTK}
+                        onClick={(e) => handleContextMenu(e, item)}>
                         <TableCell className="mui-table-cell">
                           {item.SOTK}
                         </TableCell>
@@ -262,6 +344,26 @@ export default function ManagementInterface() {
                         <TableCell className="mui-table-cell">
                           {item.NGAYMOTK}
                         </TableCell>
+                        {/* <TableCell className="mui-table-cell">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => {
+                              setStatusAdd(true);
+                            }}
+                            sx={{
+                              bgcolor: "white",
+                              color: "black",
+                              borderColor: "#d0d0d0",
+                              textTransform: "none",
+                              "&:hover": {
+                                borderColor: "#a0a0a0",
+                                bgcolor: "#f8f8f8",
+                              },
+                            }}>
+                            Chi tiết
+                          </Button>
+                        </TableCell> */}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -272,7 +374,9 @@ export default function ManagementInterface() {
         </Paper>
 
         {/* Customer Form */}
-        <form action={() => {console.log("submit")}}>
+        <form
+          action={handleSubmit}
+          style={{ display: statusAdd ? "block" : "none" }}>
           <Paper sx={{ width: 350, border: "1px solid #d0d0d0" }}>
             <Box
               sx={{
@@ -287,11 +391,13 @@ export default function ManagementInterface() {
 
             <Box
               sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-              {/* <FormField label="Mã nhân viên:" />
-            <FormField label="Họ:" />
-            <FormField label="Tên:" /> */}
-              <FormField label="CMND:" />
-              {/* <FormField label="Địa chỉ:" /> */}
+              <FormField
+                label="CMND:"
+                type="CMND"
+                name="CMND"
+                initialValue={formData.CMND}
+                onChange={handleFieldChange}
+              />
 
               {/* <Box>
               <FormControl fullWidth size="small">
@@ -315,24 +421,30 @@ export default function ManagementInterface() {
                 <FormControl fullWidth size="small">
                   <InputLabel>Mã chi nhánh:</InputLabel>
                   <Select
+                    defaultValue={""}
+                    value={formData.macn}
                     label="Mã chi nhánh:"
+                    onChange={(e) => handleFieldChange(e.target.value, "macn")}
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "#d0d0d0",
                       },
                     }}>
-                    <MenuItem value="branch1">Chi nhánh 1</MenuItem>
-                    <MenuItem value="branch2">Chi nhánh 2</MenuItem>
+                    {listBranch.map((item, index) => (
+                      <MenuItem key={index} value={item.MACN}>
+                        {item.TENCN}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Box>
 
-              <Box>
+              {/* <Box display={{ display: statusAdd === 2 ? "" : "none" }}>
                 <FormControlLabel
-                  control={<Checkbox defaultChecked />}
+                  control={<Checkbox />}
                   label="Trạng thái xóa"
                 />
-              </Box>
+              </Box> */}
 
               <Box
                 sx={{
@@ -354,6 +466,7 @@ export default function ManagementInterface() {
                 <Button
                   variant="outlined"
                   className="button-cancel"
+                  onClick={() => setStatusAdd(false)}
                   sx={{
                     borderColor: "#d0d0d0",
                     color: "black",
