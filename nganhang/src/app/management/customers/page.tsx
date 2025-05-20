@@ -35,9 +35,11 @@ import { NavItem } from "@/components/NavItem";
 import { FormField } from "@/components/FormField";
 import { SecondaryNavItem } from "@/components/SecondaryNavItem";
 
-import { getCustomers } from "@/utils/customerAPI"; // Adjust the import path as necessary
+import { getCustomers, postCustomer, putCustomer } from "@/utils/customerAPI"; // Adjust the import path as necessary
 
 import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as necessary
+
+import { convertToDate } from "@/utils/convert"; // Adjust the import path as necessary
 
 export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
@@ -50,7 +52,6 @@ export default function ManagementInterface() {
     TEN: "",
     DIACHI: "",
     PHAI: "",
-    NGAYCAP: "",
     SODT: "",
     MACN: "", // Branch code
   });
@@ -107,7 +108,7 @@ export default function ManagementInterface() {
         const data = await getBranches();
         if (data) {
           setListBranch(data.data);
-          handleFieldChange(data.data[0].MACN, "macn"); // Set the default value for the branch field
+          handleFieldChange(data.data[0].MACN, "MACN"); // Set the default value for the branch field
           return;
         }
       } catch (error) {
@@ -117,28 +118,135 @@ export default function ManagementInterface() {
     fetchData();
   }, []);
   //
+  // Function to handle field changes
+  // This function updates the formData state when a field changes
   const handleFieldChange = (value: any, fieldName: any) => {
     setFormData((prevData) => ({
       ...prevData,
       [fieldName]: value,
     }));
   };
-  const handleSubmit = () => {
-    // const { CMND, macn } = formData;
-    // if (!CMND || !macn) {
-    //   alert("Vui lòng nhập đầy đủ thông tin");
-    //   return;
-    // }
-    // try {
-    //   postAccount({ CMND, macn });
-    // } catch (error) {
-    //   console.error("Error creating account:", error);
-    // }
-    // // alert("Tạo tài khoản thành công");
-    // setStatusAdd(0);
-    // // Perform the API call to create a new account
+
+  const handleContextMenu = (event: React.MouseEvent, account: any) => {
+    event.preventDefault();
+    console.log("Right-clicked on row");
+    // Handle right-click event here
+    setFormData({
+      CMND: account.CMND,
+      HO: account.HO,
+      TEN: account.TEN,
+      DIACHI: account.DIACHI,
+      PHAI: account.PHAI,
+      SODT: account.SODT,
+      MACN: account.MACN,
+    });
+    setStatusAdd(2);
   };
-  //
+
+  const handleSubmit = () => {
+    if (statusAdd == 1) {
+      if (formData.CMND == "") {
+        alert("CMND không được để trống");
+        return;
+      }
+      if (formData.HO == "") {
+        alert("Họ không được để trống");
+        return;
+      }
+      if (formData.TEN == "") {
+        alert("Tên không được để trống");
+        return;
+      }
+      if (formData.DIACHI == "") {
+        alert("Địa chỉ không được để trống");
+        return;
+      }
+      if (formData.PHAI == "") {
+        alert("Phái không được để trống");
+        return;
+      }
+      if (formData.SODT == "") {
+        alert("Số điện thoại không được để trống");
+        return;
+      }
+      if (formData.MACN == "") {
+        alert("Mã chi nhánh không được để trống");
+        return;
+      }
+      // Call the API to add a new customer
+      postCustomer(formData)
+        .then((response: any) => {
+          alert(response.data.message);
+          window.location.reload();
+          setStatusAdd(0);
+          setFormData({
+            CMND: "",
+            HO: "",
+            TEN: "",
+            DIACHI: "",
+            PHAI: "",
+            SODT: "",
+            MACN: "", // Branch code
+          });
+          // Optionally, you can reset the form or update the customer list here
+        })
+        .catch((error) => {
+          // console.error("Error adding customer:", error);
+          alert(error.message);
+        });
+    }
+    if (statusAdd == 2) {
+      if (formData.CMND == "") {
+        alert("CMND không được để trống");
+        return;
+      }
+      if (formData.HO == "") {
+        alert("Họ không được để trống");
+        return;
+      }
+      if (formData.TEN == "") {
+        alert("Tên không được để trống");
+        return;
+      }
+      if (formData.DIACHI == "") {
+        alert("Địa chỉ không được để trống");
+        return;
+      }
+      if (formData.PHAI == "") {
+        alert("Phái không được để trống");
+        return;
+      }
+      if (formData.SODT == "") {
+        alert("Số điện thoại không được để trống");
+        return;
+      }
+      if (formData.MACN == "") {
+        alert("Mã chi nhánh không được để trống");
+        return;
+      }
+      // Call the API to update the customer
+      putCustomer(formData)
+        .then((response: any) => {
+          alert(response.data.message);
+          window.location.reload();
+          setStatusAdd(0);
+          setFormData({
+            CMND: "",
+            HO: "",
+            TEN: "",
+            DIACHI: "",
+            PHAI: "",
+            SODT: "",
+            MACN: "", // Branch code
+          });
+          // Optionally, you can reset the form or update the customer list here
+        })
+        .catch((error) => {
+          // console.error("Error updating customer:", error);
+          alert(error.message);
+        });
+    }
+  };
 
   const handSecondaryNavItemClick = (path: string) => {
     // Handle navigation to the selected path
@@ -218,7 +326,7 @@ export default function ManagementInterface() {
 
       {/* Main Content */}
       <Box sx={{ display: "flex", flex: 1, p: 2, gap: 2 }}>
-        {/* Accounts List */}
+        {/* Customers List */}
         <Paper
           sx={{
             flex: 1,
@@ -256,7 +364,8 @@ export default function ManagementInterface() {
 
           <Box sx={{ p: 2, display: "flex", flexDirection: "column", flex: 1 }}>
             <TextField
-              placeholder="Tìm kiếm khách hàng theo tên, CMND..."
+              placeholder="Tìm kiếm khách hàng theo CMND, họ, tên, số điện thoại"
+              variant="outlined"
               size="small"
               sx={{
                 mb: 2,
@@ -272,16 +381,23 @@ export default function ManagementInterface() {
               }}
               onChange={(e) => {
                 const searchValue = e.target.value;
-
-                // if (searchValue) {
-                //   const filteredAccounts = listAccount.filter((account) =>
-                //     account.SOTK.includes(searchValue)
-                //   );
-                //   setListAccount(filteredAccounts);
-                // } else {
-                //   // Reset to original list if search is cleared
-                //   setListAccount(listAccountSearch);
-                // }
+                const filteredCustomers = listCustomerSearch.filter(
+                  (customer) =>
+                    customer.CMND.includes(searchValue) ||
+                    customer.HO.toLowerCase().includes(
+                      searchValue.toLowerCase()
+                    ) ||
+                    customer.TEN.toLowerCase().includes(
+                      searchValue.toLowerCase()
+                    ) ||
+                    customer.SODT.toLowerCase().includes(
+                      searchValue.toLowerCase()
+                    )
+                );
+                setListCustomer(filteredCustomers);
+                if (searchValue === "") {
+                  setListCustomer(listCustomerSearch);
+                }
               }}
             />
 
@@ -388,9 +504,7 @@ export default function ManagementInterface() {
                       <TableRow
                         key={item.CMND}
                         onContextMenu={(e) => {
-                          e.preventDefault();
-                          console.log("Right-clicked on row:", item);
-                          setStatusAdd(2);
+                          handleContextMenu(e, item);
                         }}>
                         <TableCell className="mui-table-cell">
                           {item.CMND}
@@ -408,7 +522,14 @@ export default function ManagementInterface() {
                           {item.PHAI}
                         </TableCell>
                         <TableCell className="mui-table-cell">
-                          {item.NGAYCAP}
+                          {convertToDate(item.NGAYCAP).toLocaleDateString(
+                            "vi-VN",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )}
                         </TableCell>
                         <TableCell className="mui-table-cell">
                           {item.SODT}
@@ -470,7 +591,9 @@ export default function ManagementInterface() {
                 name="CMND"
                 initialValue={formData.CMND}
                 onChange={handleFieldChange}
+                disabled={statusAdd == 2 ? true : false}
               />
+
               <FormField
                 label="Họ:"
                 type="Text"
@@ -490,14 +613,16 @@ export default function ManagementInterface() {
                   <InputLabel>Phái:</InputLabel>
                   <Select
                     label="Phái:"
+                    defaultValue={""}
+                    value={formData.PHAI}
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "#d0d0d0",
                       },
                     }}
-                    onChange={handleFieldChange}>
+                    onChange={(e) => handleFieldChange(e.target.value, "PHAI")}>
                     <MenuItem value="Nam">Nam</MenuItem>
-                    <MenuItem value="Nu">Nữ</MenuItem>
+                    <MenuItem value="Nữ">Nữ</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -522,9 +647,10 @@ export default function ManagementInterface() {
                   <InputLabel>Mã chi nhánh:</InputLabel>
                   <Select
                     defaultValue={""}
-                    // value={formData.macn}
+                    value={formData.MACN}
+                    disabled={statusAdd == 2 ? true : false}
                     label="Mã chi nhánh:"
-                    onChange={(e) => handleFieldChange(e.target.value, "macn")}
+                    onChange={(e) => handleFieldChange(e.target.value, "MACN")}
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "#d0d0d0",
@@ -566,7 +692,18 @@ export default function ManagementInterface() {
                 <Button
                   variant="outlined"
                   className="button-cancel"
-                  onClick={() => setStatusAdd(0)}
+                  onClick={() => {
+                    setStatusAdd(0);
+                    setFormData({
+                      CMND: "",
+                      HO: "",
+                      TEN: "",
+                      DIACHI: "",
+                      PHAI: "",
+                      SODT: "",
+                      MACN: "", // Branch code
+                    });
+                  }}
                   sx={{
                     borderColor: "#d0d0d0",
                     color: "black",

@@ -1,6 +1,8 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 
 import { executeQuery } from "../services/executeQuery";
+import sql from "mssql";
+
 export const getInfoCustomer: RequestHandler = (
   req: Request,
   res: Response
@@ -28,5 +30,83 @@ export const getAlCustomer: RequestHandler = async (
   } catch (error) {
     console.error("Error fetching branches:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const postCustomer: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { CMND, HO, TEN, DIACHI, PHAI, SODT, MACN } = req.body;
+    const query = `
+      EXECUTE [dbo].[sp_them_khach_hang] 
+          @CMND
+          ,@HO
+          ,@TEN
+          ,@DIACHI
+          ,@PHAI
+          ,@SODT
+          ,@MACN`;
+    const params = [
+      { name: "CMND", type: sql.NChar(10), value: CMND },
+      { name: "HO", type: sql.NVarChar(50), value: HO },
+      { name: "TEN", type: sql.NVarChar(50), value: TEN },
+      { name: "DIACHI", type: sql.NVarChar(100), value: DIACHI },
+      { name: "PHAI", type: sql.NVarChar(3), value: PHAI },
+      { name: "SODT", type: sql.NVarChar(15), value: SODT },
+      { name: "MACN", type: sql.NChar(10), value: MACN },
+    ];
+    var result: any = await executeQuery(query, params);
+    if (result[0].Result != undefined) {
+      res.status(200).json({ message: result[0].Result, success: true });
+      return;
+    }
+    if (result[0].ErrorMessage != undefined) {
+      res.status(401).json({ message: result[0].ErrorMessage, success: false });
+      return;
+    }
+  } catch (error) {
+    console.error("Error creating customer:", error);
+    res.status(500).json({ error: error });
+  }
+};
+
+export const updateCustomer: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { CMND, HO, TEN, DIACHI, PHAI, SODT } = req.body;
+    const query = `
+      EXECUTE [dbo].[sp_sua_khach_hang] 
+          @CMND
+          ,@HO
+          ,@TEN
+          ,@DIACHI
+          ,@PHAI
+          ,@SODT`;
+    const params = [
+      { name: "CMND", type: sql.NChar(10), value: CMND },
+      { name: "HO", type: sql.NVarChar(50), value: HO },
+      { name: "TEN", type: sql.NVarChar(50), value: TEN },
+      { name: "DIACHI", type: sql.NVarChar(100), value: DIACHI },
+      { name: "PHAI", type: sql.NVarChar(3), value: PHAI },
+      { name: "SODT", type: sql.NVarChar(15), value: SODT },
+    ];
+    var result = await executeQuery(query, params);
+    if (result[0].Result != undefined) {
+      res.status(200).json({ message: result[0].Result, success: true });
+      return;
+    }
+    if (result[0].ErrorMessage != undefined) {
+      res.status(401).json({ message: result[0].ErrorMessage, success: false });
+      return;
+    }
+  } catch (error) {
+    console.error("Error creating customer:", error);
+    res.status(500).json({ error: error });
   }
 };

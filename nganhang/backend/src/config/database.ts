@@ -4,7 +4,7 @@ import { dbConfig } from "./env";
 
 let pool: ConnectionPool | null = null;
 export const connectDB = async (): Promise<ConnectionPool> => {
-  // Load environment variables from .env file  
+  // Load environment variables from .env file
   try {
     if (pool) {
       console.log("Using existing connection pool.");
