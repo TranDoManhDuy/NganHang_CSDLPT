@@ -10,7 +10,7 @@ export const authenticateToken: RequestHandler = (req: Request, res: Response, n
     // Token phải có dạng "Bearer <token>"
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
-        res.status(401).json({ message: 'Access token missing' });
+        res.status(401).json({ message: 'Access token missing'});
     } else {
         const secret = process.env.JWT_SECRET;
         if (!secret) {

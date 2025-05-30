@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const res = await axios.post(
-          "http://localhost:5000/api/auth/refreshToken",
+          "http://localhost:5000/api/auth/refreshAccessToken",
           {},
           {
             withCredentials: true,
@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
         if (res.status === 200) {
           localStorage.setItem(
             "token",
-            JSON.stringify({ access_token: res.data.access_token })
+            JSON.stringify({ access_token: res.data.accessToken })
           );
           axiosInstance.defaults.headers.common[
             "Authorization"
@@ -56,11 +56,10 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalRequest);
         }
       } catch (err) {
-        console.error("Refresh token failed:", err);
         return Promise.reject(err);
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response.data);
   }
 );
 

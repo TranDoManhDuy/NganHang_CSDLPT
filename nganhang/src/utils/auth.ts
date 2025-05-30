@@ -1,25 +1,25 @@
 import axiosInstance from "./axiosConfig";
-export const getNewAccessToken = async (): Promise<string | null> => {
-  try {
-    const res = await fetch("http://localhost:5000/api/auth/refreshToken", {
-      method: "POST",
-      credentials: "include",
-    });
-    const data = await res.json();
-    if (res.ok && data.access_token) {
-      localStorage.setItem(
-        "token",
-        JSON.stringify({ access_token: data.access_token })
-      );
-      return data.access_token;
-    } else {
-      return null;
-    }
-  } catch (err) {
-    console.error("Refresh token failed:", err);
-    return null;
-  }
-};
+// export const getNewAccessToken = async (): Promise<string | null> => {
+//   try {
+//     const res = await fetch("http://localhost:5000/api/auth/refreshAccessToken", {
+//       method: "POST",
+//       credentials: "include",
+//     });
+//     const data = await res.json();
+//     if (res.ok && data.access_token) {
+//       localStorage.setItem(
+//         "token",
+//         JSON.stringify({ access_token: data.access_token })
+//       );
+//       return data.access_token;
+//     } else {
+//       return null;
+//     }
+//   } catch (err) {
+//     console.error("Refresh token failed:", err);
+//     return null;
+//   }
+// };
 
 export const login = async (
   account_number: string,

@@ -27,8 +27,7 @@ export const login: RequestHandler = (req: Request, res: Response): void => {
     }
 };
 
-export const refreshToken = (req: Request, res: Response, next: NextFunction): void => {
-    // Lấy refresh token từ cookie
+export const refreshAccessToken = (req: Request, res: Response, next: NextFunction): void => {
     const refreshToken = req.cookies['refresh_token'];
     if (!refreshToken) {
         res.status(403).json({ message: 'Refresh token is missing' });
