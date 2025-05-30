@@ -7,7 +7,6 @@ import { router_auth } from "./routers/auth.router";
 import { router_customer } from "./routers/customer.router";
 import { router_account } from "./routers/account.router";
 import { router_branch } from "./routers/branch.router";
-import { testRouter } from "./routers/test";
 // import { router_customer } from "./routers/customer.router";
 // Load biến môi trường từ .env
 dotenv.config();
@@ -35,7 +34,7 @@ app.use("/api", router_customer);
 // app.use("/api", router1);
 app.use("/api", router_account);
 app.use("/api", router_branch);
-app.use("/api", testRouter);
+
 // app.use("/api", (req: Request, res: Response) => {
 // Khởi động server
 const PORT = process.env.PORT || 5000;

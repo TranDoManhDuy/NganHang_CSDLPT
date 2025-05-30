@@ -4,6 +4,7 @@ interface JwtPayload {
     account_number: string;
     account_type: string;
 }
+
 export const login: RequestHandler = (req: Request, res: Response): void => {
     const { account_number, password, account_type} = req.body;
     if (account_number === '2874' && password === '123456') {
@@ -27,8 +28,11 @@ export const login: RequestHandler = (req: Request, res: Response): void => {
     }
 };
 
-export const refreshAccessToken = (req: Request, res: Response, next: NextFunction): void => {
-    const refreshToken = req.cookies['refresh_token'];
+export const refreshAccessToken = (req: Request, res: Response): void => {
+    // Kiểm tra xem có cookies không
+    console.log('All cookies:', req.cookies);
+    const refreshToken = req.cookies.refresh_token;
+    console.log('Refresh token from cookies:', refreshToken);
     if (!refreshToken) {
         res.status(403).json({ message: 'Refresh token is missing' });
     }
@@ -47,7 +51,25 @@ export const refreshAccessToken = (req: Request, res: Response, next: NextFuncti
             );
             res.status(200).json({ access_token: accessToken });
         } catch (err) {
-            res.status(403).json({ message: 'Invalid or expired refresh token' });
+            res.status(403).json({ message: 'Invalid or expired refresh token'});
+        }
+    }
+};
+
+// kiểm tra access token
+export const verifyAccessToken = (req: Request, res: Response): void => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ message: 'Unauthorized' });
+    }
+    else {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+            (req as any).user = decoded;
+            res.status(200).json({ message: 'Token is valid', success: true });
+        }
+        catch (err) {
+            res.status(401).json({ message: 'Unauthorized' });
         }
     }
 };

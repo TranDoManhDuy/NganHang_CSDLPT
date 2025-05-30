@@ -4,12 +4,14 @@ interface JwtPayload {
     account_number: string;
     account_type: string;
 }
-// Middleware kiểm tra và xác thực JWT
+
+// Middleware kiểm tra và xác thực JWT, access token
 export const authenticateToken: RequestHandler = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
     // Token phải có dạng "Bearer <token>"
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
+        // trong request ko có token
         res.status(401).json({ message: 'Access token missing'});
     } else {
         const secret = process.env.JWT_SECRET;
@@ -23,7 +25,8 @@ export const authenticateToken: RequestHandler = (req: Request, res: Response, n
                 (req as any).user = decoded;
                 next();
             } catch (err) {
-                res.status(403).json({ message: 'Invalid or expired token' });
+                // token không hợp lệ hoặc đã hết hạn
+                res.status(401).json({ message: 'Invalid or expired token' });
             }
         }
     }
