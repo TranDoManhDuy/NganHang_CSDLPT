@@ -17,7 +17,7 @@ export const login: RequestHandler = (req: Request, res: Response): void => {
         res.cookie('refresh_token', refresh_token, {
             httpOnly: true,    // Chỉ có thể truy cập thông qua HTTP, không thể qua JavaScript
             // secure: process.env.NODE_ENV === 'production', // Chỉ gửi qua HTTPS nếu ở môi trường sản xuất
-            secure: false,
+            secure: true,
             sameSite: 'lax', // Giới hạn cookie chỉ được gửi cho cùng một miền
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày (time in milliseconds)
         });
@@ -29,10 +29,7 @@ export const login: RequestHandler = (req: Request, res: Response): void => {
 };
 
 export const refreshAccessToken = (req: Request, res: Response): void => {
-    // Kiểm tra xem có cookies không
-    console.log('All cookies:', req.cookies);
     const refreshToken = req.cookies.refresh_token;
-    console.log('Refresh token from cookies:', refreshToken);
     if (!refreshToken) {
         res.status(403).json({ message: 'Refresh token is missing' });
     }
@@ -49,27 +46,19 @@ export const refreshAccessToken = (req: Request, res: Response): void => {
                 process.env.JWT_SECRET!,
                 { expiresIn: '30m' }
             );
-            res.status(200).json({ access_token: accessToken });
+            res.status(200).json({ access_token: accessToken, success: true});
         } catch (err) {
-            res.status(403).json({ message: 'Invalid or expired refresh token'});
+            res.status(403).json({ message: 'Invalid or expired refresh token', success: false});
         }
     }
 };
 
-// kiểm tra access token
-export const verifyAccessToken = (req: Request, res: Response): void => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-        res.status(401).json({ message: 'Unauthorized' });
-    }
-    else {
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-            (req as any).user = decoded;
-            res.status(200).json({ message: 'Token is valid', success: true });
-        }
-        catch (err) {
-            res.status(401).json({ message: 'Unauthorized' });
-        }
-    }
-};
+// xóa đi cookie
+export const logout = (req: Request, res: Response): void => {
+    res.clearCookie('refresh_token', {
+        httpOnly: true,    // Chỉ có thể truy cập thông qua HTTP, không thể qua JavaScript
+        secure: true,
+        sameSite: 'lax', // Giới hạn cookie chỉ được gửi cho cùng một miền
+    });
+    res.status(200).json({ message: 'Logout successful', success: true });
+}
