@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosConfig";
+import axios from "axios";
 
 // đăng nhập
 export const login = async (
@@ -11,7 +12,7 @@ export const login = async (
   message: string;
 }> => {
   try {
-    const res = await axiosInstance.post("api/auth/login", {
+    const res = await axios.post("http://localhost:5000/api/auth/login", {
       account_number,
       password,
       account_type,
