@@ -39,26 +39,23 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
+    
     const originalRequest = error.config;
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         // refresh access token
-        const res = await axios.post(
+        const res = await axios.get(
           "http://localhost:5000/api/auth/refreshAccessToken",
-          {},
           {
             withCredentials: true,
-            headers: {
-              'Content-Type': 'application/json'
-            }
           }
         );
-        if (res.status === 200) {
+        if (res.status == 200) {
           // lưu lại access token mới
           localStorage.setItem(
             "token",
-            JSON.stringify({ access_token: res.data.accessToken })
+            JSON.stringify({ access_token: res.data.access_token })
           );
           axiosInstance.defaults.headers.common[
             "Authorization"

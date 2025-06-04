@@ -1,7 +1,7 @@
 "use client";
 import React, { Fragment, useState } from "react";
 import { getCustomers } from "@/utils/customerAPI";
-import { login, refreshAccessToken } from "@/utils/auth";
+import { login } from "@/utils/auth";
 export default function LoginForm() {
   const [account_type, setAccountType] = useState("chinhanh")
   const [account_number, setAccount_number] = useState("");
