@@ -1,6 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { executeQuery } from "../services/executeQuery";
 import sql from 'mssql';
+
 export const getAllAccount: RequestHandler = async (
   req: Request,
   res: Response
@@ -19,6 +20,7 @@ export const getAllAccount: RequestHandler = async (
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 export const postAccount: RequestHandler = async (
   req: Request,
   res: Response

@@ -83,7 +83,11 @@ export const verifyAuth = async (): Promise<boolean> => {
         try {
             const refreshResponse = await axiosInstance.get('api/auth/refreshAccessToken');
             if (refreshResponse.data.success) {
-                localStorage.setItem('access_token', refreshResponse.data.access_token);
+              console.log("refreshResponse.data.accessToken", refreshResponse.data);
+              localStorage.setItem(
+                "token",
+                JSON.stringify({ access_token: refreshResponse.data.access_token })
+              );
                 return true;
             } else {
                 return false;

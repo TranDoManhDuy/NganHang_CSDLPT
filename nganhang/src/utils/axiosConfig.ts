@@ -51,11 +51,11 @@ axiosInstance.interceptors.response.use(
             withCredentials: true,
           }
         );
-        if (res.status === 200) {
+        if (res.status == 200) {
           // lưu lại access token mới
           localStorage.setItem(
             "token",
-            JSON.stringify({ access_token: res.data.accessToken })
+            JSON.stringify({ access_token: res.data.access_token })
           );
           axiosInstance.defaults.headers.common[
             "Authorization"
