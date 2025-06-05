@@ -26,7 +26,7 @@ export const postStaff: RequestHandler = async (
     res: Response,
 ) => {
     try {
-        const { MANV, HO, TEN, CMND, DIACHI, PHAI, SODT, MACN } = req.body;
+        let { MANV, HO, TEN, CMND, DIACHI, PHAI, SODT, MACN } = req.body;
 
         const query = `
         EXECUTE [dbo].[them_nhan_vien] 
@@ -70,8 +70,11 @@ export const putStaff: RequestHandler = async (
     res: Response,
   ) => {
     try {
-      const { MANV, HO, TEN, CMND, DIACHI, PHAI, SODT, MACN, TrangThaiXoa} = req.body;
-  
+      let { MANV, HO, TEN, CMND, DIACHI, PHAI, SODT, MACN, TrangThaiXoa} = req.body;
+      if (TrangThaiXoa == true) {
+        TrangThaiXoa = 1
+      }
+      else {TrangThaiXoa = 0}
       const query = `
         EXECUTE [dbo].[sua_nhan_vien] 
             @MANV

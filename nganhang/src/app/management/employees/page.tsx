@@ -40,10 +40,10 @@ import { getCustomers, postCustomer, putCustomer } from "@/utils/customerAPI"; /
 import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as necessary
 
 import { convertToDate } from "@/utils/convert"; // Adjust the import path as necessary
-import { getAllStaff } from "@/utils/staffAPI";
+import { getAllStaff, postStaff, putStaff } from "@/utils/staffAPI";
 
 interface Staff {
-  MAVN: string;
+  MANV: string;
   HO: string;
   TEN: string;
   CMND: string;
@@ -51,8 +51,7 @@ interface Staff {
   PHAI: string;
   SODT: string;
   MACN: string;
-  NGAYCAP: string;
-  IsAVAILABLE: boolean | null;
+  TrangThaiXoa: any;
 }
 
 export default function ManagementInterface() {
@@ -65,7 +64,7 @@ export default function ManagementInterface() {
 
   // sử dụng để lấy dữ liệu từ form
   const [formData, setFormData] = useState<Staff>({
-    MAVN: "",
+    MANV: "",
     HO: "",
     TEN: "",
     CMND: "",
@@ -73,8 +72,7 @@ export default function ManagementInterface() {
     PHAI: "",
     SODT: "",
     MACN: "", // Branch code
-    NGAYCAP: "",
-    IsAVAILABLE: null
+    TrangThaiXoa: null
   });
   // State to hold the list of accounts
   const [listStaff, setListStaff] = useState<Staff[]>([]);
@@ -121,40 +119,36 @@ export default function ManagementInterface() {
   //
   // Function to handle field changes
   // This function updates the formData state when a field changes
-  const handleFieldChange = (value: string, fieldName: keyof Staff) => {
+  const handleFieldChange = (value: any, fieldName: keyof Staff) => {
     setFormData((prevData) => {
       const newData = {
         ...prevData,
         [fieldName]: value,
       };
-      console.log('Previous data:', prevData);
-      console.log('New data:', newData);
       return newData;
     });
   };
 
-  // reset lại form, chuẩn bị cho việc chỉnh sửa form
-  const handleContextMenu = (event: React.MouseEvent, account: any) => {
+  const handleContextMenu = (event: React.MouseEvent, staff: Staff) => {
     event.preventDefault();
-    console.log("Right-clicked on row");
     setFormData({
-      MAVN: "",
-      HO: "",
-      TEN: "",
-      CMND: "",
-      DIACHI: "",
-      PHAI: "",
-      SODT: "",
-      MACN: "", 
-      NGAYCAP: "",
-      IsAVAILABLE: null
+      MANV: staff.MANV,
+      HO: staff.HO,
+      TEN: staff.TEN,
+      CMND: staff.CMND,
+      DIACHI: staff.DIACHI,
+      PHAI: staff.PHAI,
+      SODT: staff.SODT,
+      MACN: staff.MACN, 
+      TrangThaiXoa: staff.TrangThaiXoa
     });
     setStatusAdd(2);
   };
 
   const handleSubmit = () => {
+    console.log(formData)
     if (statusAdd == 1) {
-      if (formData.MAVN == "") {
+      if (formData.MANV == "") {
         alert("Mã nhân viên không được để trống")
         return;
       }
@@ -186,6 +180,26 @@ export default function ManagementInterface() {
         alert("Mã chi nhánh không được để trống");
         return;
       }
+      postStaff(formData)
+        .then((response: any) => {
+          console.log(response)
+          if (response.status == 200) {
+            alert(response.data.message);
+            window.location.reload();
+            setStatusAdd(0);
+            setFormData({
+              MANV: "",
+              HO: "",
+              TEN: "",
+              CMND: "",
+              DIACHI: "",
+              PHAI: "",
+              SODT: "",
+              MACN: "", // Branch code
+              TrangThaiXoa: null
+            });
+          }
+        })
       // Call the API to add a new customer
       // postCustomer(formData)
       //   .then((response: any) => {
@@ -193,7 +207,7 @@ export default function ManagementInterface() {
       //     window.location.reload();
       //     setStatusAdd(0);
       //     setFormData({
-      //       MAVN: "",
+      //       MANV: "",
       //       HO: "",
       //       TEN: "",
       //       CMND: "",
@@ -201,8 +215,7 @@ export default function ManagementInterface() {
       //       PHAI: "",
       //       SODT: "",
       //       MACN: "", // Branch code
-      //       NGAYCAP: "",
-      //       IsAVAILABLE: null
+      //       TrangThaiXoa: null
       //     });
       //     // Optionally, you can reset the form or update the customer list here
       //   })
@@ -240,10 +253,30 @@ export default function ManagementInterface() {
         alert("Mã chi nhánh không được để trống");
         return;
       }
-      if (formData.IsAVAILABLE == null) {
+      if (formData.TrangThaiXoa =! 1 && formData.TrangThaiXoa != 0) {
         alert("Trạng thái làm việc không được để trống")
         return
       }
+      putStaff(formData)
+        .then((response: any) => {
+          console.log(response)
+          if (response.status == 200) {
+            // alert(response.data.message);
+            // window.location.reload();
+            setStatusAdd(0);
+            setFormData({
+              MANV: "",
+              HO: "",
+              TEN: "",
+              CMND: "",
+              DIACHI: "",
+              PHAI: "",
+              SODT: "",
+              MACN: "", // Branch code
+              TrangThaiXoa: null
+            });
+          }
+        })
       // Call the API to update the customer
       // putCustomer(formData)
       //   .then((response: any) => {
@@ -251,7 +284,7 @@ export default function ManagementInterface() {
       //     window.location.reload();
       //     setStatusAdd(0);
       //     setFormData({
-      //       MAVN: "",
+      //       MANV: "",
       //       HO: "",
       //       TEN: "",
       //       CMND: "",
@@ -259,8 +292,7 @@ export default function ManagementInterface() {
       //       PHAI: "",
       //       SODT: "",
       //       MACN: "", // Branch code
-      //       NGAYCAP: "",
-      //       IsAVAILABLE: null
+      //       TrangThaiXoa: null
       //     });
       //     // Optionally, you can reset the form or update the customer list here
       //   })
@@ -344,7 +376,6 @@ export default function ManagementInterface() {
 
       {/* Main Content */}
       <Box sx={{ display: "flex", flex: 1, p: 2, gap: 2 }}>
-        {/* Customers List */}
         <Paper
           sx={{
             flex: 1,
@@ -390,13 +421,13 @@ export default function ManagementInterface() {
                 width: "100%",
                 "& .MuiOutlinedInput-root": { borderColor: "#d0d0d0" },
               }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" sx={{ color: "#666666" }} />
-                  </InputAdornment>
-                ),
-              }}
+              // InputProps={{
+              //   startAdornment: (
+              //     <InputAdornment position="start">
+              //       <SearchIcon fontSize="small" sx={{ color: "#666666" }} />
+              //     </InputAdornment>
+              //   ),
+              // }}
               onChange={(e) => {
                 const searchValue = e.target.value;
                 const filteredStaff = listStaffSearch.filter(
@@ -515,7 +546,7 @@ export default function ManagementInterface() {
                           border: "1px solid #d0d0d0",
                           bgcolor: "#b9b9b9",
                         }}>
-                        Còn Làm Việc
+                        Trạng thái công việc
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -524,10 +555,11 @@ export default function ManagementInterface() {
                       <TableRow
                         key={item.CMND}
                         onContextMenu={(e) => {
+                          console.log(item)
                           handleContextMenu(e, item);
                         }}>
                         <TableCell className="mui-table-cell">
-                          {item.MAVN}
+                          {item.MANV}
                         </TableCell>
                         <TableCell className="mui-table-cell">
                           {item.HO}
@@ -548,10 +580,15 @@ export default function ManagementInterface() {
                           {item.SODT}
                         </TableCell>
                         <TableCell className="mui-table-cell">
-                          {item.MACN}
+                          {(() => {
+                            if (item.MACN == null) {
+                              return "Trụ sở chính"
+                            }
+                            return item.MACN
+                          })()}
                         </TableCell>
                         <TableCell className="mui-table-cell">
-                          {item.IsAVAILABLE ? "Có" : "Không"}
+                          {item.TrangThaiXoa == 1 ? "Đã nghỉ việc":"Còn làm việc"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -575,40 +612,48 @@ export default function ManagementInterface() {
               }}>
               <Typography sx={{ fontWeight: 500 }}>
                 {statusAdd == 1 ? "Thêm nhân viên" : ""}
-                {statusAdd == 2 ? "Hiểu chỉnh nhân viên" : ""}
+                {statusAdd == 2 ? "Hiệu chỉnh nhân viên" : ""}
               </Typography>
             </Box>
-
             <Box
               sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+              { statusAdd == 1 &&
+                (<FormField
+                label="MANV:"
+                type="text"
+                name="MANV"
+                initialValue={formData.MANV}
+                onChange={(value) => handleFieldChange(value, "MANV")}
+                />)
+              }
               <FormField
                 label="CMND:"
-                type="CMND"
+                type="text"
                 name="CMND"
                 initialValue={formData.CMND}
                 onChange={(value) => handleFieldChange(value, "CMND")}
-                disabled={statusAdd == 2 ? true : false}
+                // disabled={statusAdd == 2 ? true : false}
               />
 
               <FormField
                 label="Họ:"
-                type="Text"
+                type="text"
                 name="HO"
                 initialValue={formData.HO}
                 onChange={(value) => handleFieldChange(value, "HO")}
               />
               <FormField
                 label="Tên:"
-                type="Text"
+                type="text"
                 name="TEN"
                 initialValue={formData.TEN}
                 onChange={(value) => handleFieldChange(value, "TEN")}
               />
-              <Box>
+              <Box sx={{mb: 2}}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Phái:</InputLabel>
+                  <InputLabel>Phái</InputLabel>
                   <Select
-                    label="Phái:"
+                    label="Phái"
                     defaultValue={""}
                     value={formData.PHAI}
                     sx={{
@@ -622,7 +667,7 @@ export default function ManagementInterface() {
                   </Select>
                 </FormControl>
               </Box>
-
+              
               <FormField
                 label="Địa chỉ:"
                 type="Text"
@@ -642,11 +687,20 @@ export default function ManagementInterface() {
                 <FormControl fullWidth size="small">
                   <InputLabel>Mã chi nhánh:</InputLabel>
                   <Select
-                    defaultValue={""}
-                    value={formData.MACN}
-                    disabled={statusAdd == 2 ? true : false}
+                    defaultValue={(() => {
+                      if (statusAdd == 1) {
+                        return selectedBranch
+                      }
+                      return formData.MACN
+                    })()}
+                    value={(() => {
+                      if (statusAdd == 1) {
+                        return selectedBranch
+                      }
+                      return formData.MACN
+                    })()}
+                    disabled= {true}
                     label="Mã chi nhánh:"
-                    onChange={(e) => handleFieldChange(e.target.value, "MACN")}
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "#d0d0d0",
@@ -660,7 +714,31 @@ export default function ManagementInterface() {
                   </Select>
                 </FormControl>
               </Box>
-
+              <Box sx={{
+                mt: 3
+              }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Trạng thái công việc</InputLabel>
+                  <Select
+                    disabled = {statusAdd == 1? true : false}
+                    label="Trạng thái công việc"
+                    defaultValue={""}
+                    value={formData.TrangThaiXoa == 1? "1" : "0"}
+                    sx={{
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#d0d0d0",
+                      },
+                    }}
+                    onChange={(e) => {
+                      let value = e.target.value == "1"? 1:0
+                      console.log(value)
+                      handleFieldChange(value, "TrangThaiXoa")
+                    }}>
+                    <MenuItem value="0">Còn làm việc</MenuItem>
+                    <MenuItem value="1">Đã nghỉ việc</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
               <Box
                 sx={{
                   display: "flex",
@@ -684,7 +762,7 @@ export default function ManagementInterface() {
                   onClick={() => {
                     setStatusAdd(0);
                     setFormData({
-                      MAVN: "",
+                      MANV: "",
                       HO: "",
                       TEN: "",
                       CMND: "",
@@ -692,8 +770,7 @@ export default function ManagementInterface() {
                       PHAI: "",
                       SODT: "",
                       MACN: "",
-                      NGAYCAP: "",
-                      IsAVAILABLE: null
+                      TrangThaiXoa: null
                     });
                   }}
                   sx={{
