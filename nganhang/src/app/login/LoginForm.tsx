@@ -1,11 +1,12 @@
 "use client";
 import React, { Fragment, useState } from "react";
-import { login, getNewAccessToken } from "@/utils/auth";
-
+import { getCustomers } from "@/utils/customerAPI";
+import { login } from "@/utils/auth";
 export default function LoginForm() {
   const [account_type, setAccountType] = useState("chinhanh")
   const [account_number, setAccount_number] = useState("");
   const [password, setPassword] = useState("");
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await login(account_number, password, account_type);
@@ -22,14 +23,6 @@ export default function LoginForm() {
     }
   };
   
-  const handleRefreshToken = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const newToken = await getNewAccessToken();
-    console.log({"new refresh token": newToken})
-    if (newToken == null) {
-      alert("Đăng nhập lại")
-    }
-  }
   return (
     <Fragment>
       <form onSubmit={handleLogin} className="space-y-5">
@@ -84,12 +77,6 @@ export default function LoginForm() {
           <a href="/login/forgot" className="text-blue-600 hover:underline">Quên mật khẩu</a>
         </p>
       </form>
-      <button
-          onClick={handleRefreshToken}
-          className="w-full rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700 transition duration-200"
-        >
-          Refresh Token
-        </button>
     </Fragment>
   );
 }

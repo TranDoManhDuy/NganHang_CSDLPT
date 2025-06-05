@@ -4,6 +4,7 @@ interface JwtPayload {
     account_number: string;
     account_type: string;
 }
+
 export const login: RequestHandler = (req: Request, res: Response): void => {
     const { account_number, password, account_type} = req.body;
     if (account_number === '2874' && password === '123456') {
@@ -16,7 +17,7 @@ export const login: RequestHandler = (req: Request, res: Response): void => {
         res.cookie('refresh_token', refresh_token, {
             httpOnly: true,    // Chỉ có thể truy cập thông qua HTTP, không thể qua JavaScript
             // secure: process.env.NODE_ENV === 'production', // Chỉ gửi qua HTTPS nếu ở môi trường sản xuất
-            secure: false,
+            secure: true,
             sameSite: 'lax', // Giới hạn cookie chỉ được gửi cho cùng một miền
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày (time in milliseconds)
         });
@@ -27,9 +28,8 @@ export const login: RequestHandler = (req: Request, res: Response): void => {
     }
 };
 
-export const refreshToken = (req: Request, res: Response, next: NextFunction): void => {
-    // Lấy refresh token từ cookie
-    const refreshToken = req.cookies['refresh_token'];
+export const refreshAccessToken = (req: Request, res: Response): void => {
+    const refreshToken = req.cookies.refresh_token;
     if (!refreshToken) {
         res.status(403).json({ message: 'Refresh token is missing' });
     }
@@ -46,9 +46,19 @@ export const refreshToken = (req: Request, res: Response, next: NextFunction): v
                 process.env.JWT_SECRET!,
                 { expiresIn: '30m' }
             );
-            res.status(200).json({ access_token: accessToken });
+            res.status(200).json({ access_token: accessToken, success: true});
         } catch (err) {
-            res.status(403).json({ message: 'Invalid or expired refresh token' });
+            res.status(403).json({ message: 'Invalid or expired refresh token', success: false});
         }
     }
 };
+
+// xóa đi cookie
+export const logout = (req: Request, res: Response): void => {
+    res.clearCookie('refresh_token', {
+        httpOnly: true,    // Chỉ có thể truy cập thông qua HTTP, không thể qua JavaScript
+        secure: true,
+        sameSite: 'lax', // Giới hạn cookie chỉ được gửi cho cùng một miền
+    });
+    res.status(200).json({ message: 'Logout successful', success: true });
+}

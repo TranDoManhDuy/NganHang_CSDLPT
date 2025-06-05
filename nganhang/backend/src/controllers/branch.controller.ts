@@ -5,9 +5,8 @@ export const getBranchCurrent: RequestHandler = async (
   res: Response
 ) => {
   try {
-    // const pool: ConnectionPool = await connectDB();
     const query = `
-        SELECT TOP (1) [MACN]
+        SELECT [MACN]
                 ,[TENCN]
         FROM [NGANHANG].[dbo].[ChiNhanh] 
         `;
@@ -16,6 +15,7 @@ export const getBranchCurrent: RequestHandler = async (
       message: "Get all branch successfully",
       data: result,
     });
+    console.log("Get all branch successfully");
   } catch (error) {
     console.error("Error fetching branches:", error);
     res.status(500).json({ error: "Internal server error" });

@@ -72,3 +72,7 @@ backend/
 - Chức năng: nơi khởi chạy server, nơi thiết lập ứng dụng Express và chạy server.
 - Vai trò: Khởi tạo server, thiết lập các middleware toàn cục và gắn các router.
     + Là điểm bắt đầu của ứng dụng.
+
+Some  rule
+401: Lỗi chưa xác thực.
+403: Đã xác thực nhưng không có quyền.

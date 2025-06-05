@@ -1,5 +1,4 @@
 import sql, { ConnectionPool } from "mssql";
-import dotenv from "dotenv";
 import { dbConfig } from "./env";
 
 let pool: ConnectionPool | null = null;
