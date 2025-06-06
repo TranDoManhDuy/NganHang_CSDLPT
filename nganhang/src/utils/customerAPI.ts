@@ -5,10 +5,6 @@ export const getCustomers = async () => {
     const response = await axiosInstance.get("/api/customer");
     return response.data;
   } catch (error: any) {
-    if (error.response.status === 403) {
-      // chuyển đường dẫn
-      window.location.href = "/";
-    }
     throw error.response.data;
   }
 };
@@ -18,7 +14,7 @@ export const postCustomer = async (customerData: any) => {
     const response = await axiosInstance.post("/api/customer", customerData);
     return response;
   } catch (error: any) {
-    throw error.response.data;
+    throw error;
   }
 };
 
@@ -27,6 +23,20 @@ export const putCustomer = async (customerData: any) => {
     const response = await axiosInstance.put("/api/customer", customerData);
     return response;
   } catch (error: any) {
-    throw error.response.data;
+    throw error;
+  }
+};
+
+export const deleteCustomer = async (cmnd: string) => {
+  try {
+    const data: any = {
+      CMND: cmnd,
+    };
+    const response = await axiosInstance.delete("/api/customer", {
+      data: data, // axios delete method requires data to be passed in the body
+    });
+    return response;
+  } catch (error: any) {
+    throw error;
   }
 };

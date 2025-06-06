@@ -107,19 +107,24 @@ export default function ManagementInterface() {
     }));
   };
   const handleSubmit = () => {
-    const { CMND, macn } = formData;
-    if (!CMND || !macn) {
+    if (!formData.CMND || !formData.macn) {
       alert("Vui lòng nhập đầy đủ thông tin");
       return;
     }
-    try {
-      postAccount({ CMND, macn });
-    } catch (error) {
-      console.error("Error creating account:", error);
-    }
-    // alert("Tạo tài khoản thành công");
-    setStatusAdd(false);
-    // Perform the API call to create a new account
+
+    postAccount(formData)
+      .then((response) => {
+        alert(response.data.message);
+        window.location.reload();
+        setStatusAdd(false);
+        setFormData({
+          CMND: "",
+          macn: "",
+        });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
   //
 
@@ -129,7 +134,7 @@ export default function ManagementInterface() {
     // history.push(path);
     // or
     // navigate(path);
-    location.href = path
+    location.href = path;
   };
   const handleContextMenu = (event: React.MouseEvent, account: Object) => {};
   return (
