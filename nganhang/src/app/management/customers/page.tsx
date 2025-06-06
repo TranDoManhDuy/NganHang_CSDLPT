@@ -35,7 +35,12 @@ import { NavItem } from "@/components/NavItem";
 import { FormField } from "@/components/FormField";
 import { SecondaryNavItem } from "@/components/SecondaryNavItem";
 
-import { getCustomers, postCustomer, putCustomer } from "@/utils/customerAPI"; // Adjust the import path as necessary
+import {
+  getCustomers,
+  postCustomer,
+  putCustomer,
+  deleteCustomer,
+} from "@/utils/customerAPI"; // Adjust the import path as necessary
 
 import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as necessary
 
@@ -44,6 +49,7 @@ import { convertToDate } from "@/utils/convert"; // Adjust the import path as ne
 export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [statusAdd, setStatusAdd] = useState(0);
+  const [statusDelete, setStatusDelete] = useState(false); // State to manage the status of adding or editing a customer
   // State to hold the form data
 
   const [formData, setFormData] = useState({
@@ -84,6 +90,7 @@ export default function ManagementInterface() {
     const fetchData = async () => {
       try {
         const data = await getCustomers();
+        console.log("Data fetched from API:", data);
         if (data) {
           setListCustomer(data.data);
           setListCustomerSearch(data.data);
@@ -195,7 +202,7 @@ export default function ManagementInterface() {
           alert(error.message);
         });
     }
-    if (statusAdd == 2) {
+    if (statusAdd == 2 && statusDelete == false) {
       if (formData.CMND == "") {
         alert("CMND không được để trống");
         return;
@@ -244,6 +251,35 @@ export default function ManagementInterface() {
         .catch((error) => {
           // console.error("Error updating customer:", error);
           alert(error.message);
+        });
+    }
+    if (statusAdd == 2 && statusDelete == true) {
+      const confirmDelete = window.confirm(
+        "Bạn có chắc chắn muốn xóa khách hàng này không?"
+      );
+      if (!confirmDelete) {
+        return;
+      }
+      // Call the API to delete the customer
+      deleteCustomer(formData.CMND)
+        .then((response: any) => {
+          alert(response.data.message);
+          window.location.reload();
+          setStatusAdd(0);
+          setFormData({
+            CMND: "",
+            HO: "",
+            TEN: "",
+            DIACHI: "",
+            PHAI: "",
+            SODT: "",
+            MACN: "", // Branch code
+          });
+          // Optionally, you can reset the form or update the customer list here
+        })
+        .catch((error) => {
+          // console.error("Error deleting customer:", error);
+          alert(1);
         });
     }
   };
@@ -665,12 +701,15 @@ export default function ManagementInterface() {
                 </FormControl>
               </Box>
 
-              {/* <Box display={{ display: statusAdd === 2 ? "" : "none" }}>
+              <Box display={{ display: statusAdd === 2 ? "" : "none" }}>
                 <FormControlLabel
                   control={<Checkbox />}
                   label="Trạng thái xóa"
+                  onChange={(e: any) => {
+                    setStatusDelete(e.target.checked);
+                  }}
                 />
-              </Box> */}
+              </Box>
 
               <Box
                 sx={{
