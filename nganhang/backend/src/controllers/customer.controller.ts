@@ -110,3 +110,4 @@ export const updateCustomer: RequestHandler = async (
     res.status(500).json({ error: error });
   }
 };
+

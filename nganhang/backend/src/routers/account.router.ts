@@ -7,6 +7,7 @@ import {
   processDepositWithdrawal,
   transferMoney,
   getAccountStatistics,
+  getAccountStatement
 } from "../controllers/account.controller";
 
 const router_account = Router();
@@ -18,5 +19,6 @@ router_account.get("/accounts/:sotk", authenticateToken, getAccountByNumber);
 router_account.post("/deposit-withdrawal", authenticateToken, processDepositWithdrawal);
 router_account.post("/transfer-money", authenticateToken, transferMoney);
 router_account.post("/account-statistics", authenticateToken, getAccountStatistics);
+router_account.post("/account-statement", getAccountStatement);
 
 export { router_account };
