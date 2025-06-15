@@ -3,6 +3,7 @@ import { login, refreshAccessToken, logout} from "../controllers/auth.controller
 import { authenticateToken } from "../middleware/auth.middleware";
 
 const router_auth = Router();
+
 router_auth.post('/login', login);
 router_auth.get('/refreshAccessToken', refreshAccessToken);
 

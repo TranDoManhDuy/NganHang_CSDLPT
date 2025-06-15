@@ -42,13 +42,13 @@ export const postCustomer: RequestHandler = async (
     const { CMND, HO, TEN, DIACHI, PHAI, SODT, MACN } = req.body;
     const query = `
       EXECUTE [dbo].[sp_them_khach_hang] 
-          @CMND
-          ,@HO
-          ,@TEN
-          ,@DIACHI
-          ,@PHAI
-          ,@SODT
-          ,@MACN`;
+              @CMND
+              ,@HO
+              ,@TEN
+              ,@DIACHI
+              ,@PHAI
+              ,@SODT
+              ,@MACN`;
     const params = [
       { name: "CMND", type: sql.NChar(10), value: CMND },
       { name: "HO", type: sql.NVarChar(50), value: HO },
@@ -59,12 +59,18 @@ export const postCustomer: RequestHandler = async (
       { name: "MACN", type: sql.NChar(10), value: MACN },
     ];
     var result: any = await executeQuery(query, params);
-    if (result[0].Result != undefined) {
-      res.status(200).json({ message: result[0].Result, success: true });
+    if (result[0].code == 0) {
+      res.status(400).json({
+        message: result[0].message,
+        seccess: false,
+      });
       return;
     }
-    if (result[0].ErrorMessage != undefined) {
-      res.status(401).json({ message: result[0].ErrorMessage, success: false });
+    if (result[0].code == 1) {
+      res.status(200).json({
+        message: result[0].message,
+        success: true,
+      });
       return;
     }
   } catch (error) {
@@ -97,12 +103,18 @@ export const updateCustomer: RequestHandler = async (
       { name: "SODT", type: sql.NVarChar(15), value: SODT },
     ];
     var result = await executeQuery(query, params);
-    if (result[0].Result != undefined) {
-      res.status(200).json({ message: result[0].Result, success: true });
+    if (result[0].code == 0) {
+      res.status(400).json({
+        message: result[0].message,
+        seccess: false,
+      });
       return;
     }
-    if (result[0].ErrorMessage != undefined) {
-      res.status(401).json({ message: result[0].ErrorMessage, success: false });
+    if (result[0].code == 1) {
+      res.status(200).json({
+        message: result[0].message,
+        success: true,
+      });
       return;
     }
   } catch (error) {
@@ -111,3 +123,35 @@ export const updateCustomer: RequestHandler = async (
   }
 };
 
+export const deleteCustomer: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { CMND } = req.body;
+    console.log("CMND", req.body);
+    const query = `
+      EXECUTE [dbo].[sp_xoa_khach_hang] 
+            @CMND`;
+    const params = [{ name: "CMND", type: sql.NChar(10), value: CMND }];
+    var result = await executeQuery(query, params);
+    if (result[0].code == 0) {
+      res.status(400).json({
+        message: result[0].message,
+        seccess: false,
+      });
+      return;
+    }
+    if (result[0].code == 1) {
+      res.status(200).json({
+        message: result[0].message,
+        success: true,
+      });
+      return;
+    }
+  } catch (error) {
+    console.error("Error deleting customer:", error);
+    res.status(500).json({ error: error });
+  }
+};
