@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosConfig";
+import axios from "axios";
 
 // đăng nhập - giữ lại, bởi riêng login, trong axios config request không đính kèm access token
 // Còn lại tất cả các API khác, đều sẽ được verify access token ở middleware backend trả lỗi 401
@@ -12,7 +13,7 @@ export const login = async (
   message: string;
 }> => {
   try {
-    const res = await axiosInstance.post("api/auth/login", {
+    const res = await axios.post("http://localhost:5000/api/auth/login", {
       account_number,
       password,
       account_type,

@@ -150,7 +150,7 @@ export default function ManagementInterface() {
         <Toolbar variant="dense" disableGutters>
           <NavItem>Hệ thống</NavItem>
           <NavItem active>Quản lý</NavItem>
-          <NavItem>Nghiệp vụ</NavItem>
+          <NavItem >Nghiệp vụ</NavItem>
           <NavItem>Thống kê</NavItem>
         </Toolbar>
       </AppBar>

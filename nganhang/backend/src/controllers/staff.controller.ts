@@ -2,6 +2,7 @@ import { Request, Response, RequestHandler } from "express";
 import { executeQuery } from "../services/executeQuery";    
 import sql from 'mssql';
 
+
 export const getAllStaff: RequestHandler = async (
     req: Request,
     res: Response
@@ -64,7 +65,33 @@ export const postStaff: RequestHandler = async (
         res.status(500).json({ error: "Internal server error" });
     }
 };
-
+export const chuyennhanvien: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let { MANV, MACN_moi, MANV_moi} = req.body;
+    const query = `
+      EXEC [dbo].[chuyen_chi_nhanh]
+      @MANV,
+      @MACN_moi,
+      @MANV_moi
+    `;
+    let params = [
+      { name: "MANV", type: sql.NChar(10), value: MANV },
+      { name: "MACN_moi", type: sql.NChar(10), value: MACN_moi },
+      { name: "MANV_moi", type: sql.NChar(10), value: MANV_moi }
+    ]
+    const result = await executeQuery(query, params);
+    res.status(200).json({
+      message: "",
+      data: result
+    });
+  } catch (error) {
+    console.log("Chuyen nhan vien khong thanh cong")
+    res.status(500).json({error: "Internal server error"})
+  }
+}
 export const putStaff: RequestHandler = async (
     req: Request,
     res: Response,
