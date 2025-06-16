@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   AppBar,
   Toolbar,
@@ -50,9 +50,27 @@ export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [statusAdd, setStatusAdd] = useState(0);
   const [statusDelete, setStatusDelete] = useState(false); // State to manage the status of adding or editing a customer
-  // State to hold the form data
+  const linkNavitem = [
+    { label: "Quản lý", path: "/management/customers" },
+    { label: "Nghiệp vụ", path: "operation/deposit_withdrawal" },
+    { label: "Thống kê", path: "/statistic/account" },
+  ];
+  const handleNavItemClick = (path: string) => {
+    window.location.pathname = path;
+  };
 
-  const [formData, setFormData] = useState({
+  // State to hold the form data
+  interface FormData {
+    CMND: string; // ID card number
+    HO: string; // Last name
+    TEN: string; // First name
+    DIACHI: string; // Address
+    PHAI: string;
+    SODT: string; // Phone number
+    MACN: string; // Branch code
+  }
+
+  const [formData, setFormData] = useState<FormData>({
     CMND: "",
     HO: "",
     TEN: "",
@@ -60,6 +78,7 @@ export default function ManagementInterface() {
     PHAI: "",
     SODT: "",
     MACN: "", // Branch code
+    // You can add more fields as needed
   });
   // State to hold the list of accounts
   const [listCustomer, setListCustomer] = useState([
@@ -127,14 +146,11 @@ export default function ManagementInterface() {
   //
   // Function to handle field changes
   // This function updates the formData state when a field changes
-  const handleFieldChange = (value: any, fieldName: any) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldName]: value,
-    }));
-  };
+  const handleFieldChange = useCallback((value: any, fieldName: any) => {
+    setFormData((prevData) => ({ ...prevData, [fieldName]: value }));
+  }, []);
 
-  const handleContextMenu = (event: React.MouseEvent, account: any) => {
+  const handleContextMenu = (event: React.MouseEvent, account: FormData) => {
     event.preventDefault();
     console.log("Right-clicked on row");
     // Handle right-click event here
@@ -232,6 +248,7 @@ export default function ManagementInterface() {
         return;
       }
       // Call the API to update the customer
+      console.log(formData);
       putCustomer(formData)
         .then((response: any) => {
           alert(response.data.message);
@@ -285,11 +302,6 @@ export default function ManagementInterface() {
   };
 
   const handSecondaryNavItemClick = (path: string) => {
-    // Handle navigation to the selected path
-    // For example, using React Router's useHistory or useNavigate
-    // history.push(path);
-    // or
-    // navigate(path);
     location.href = path;
   };
   return (
@@ -303,10 +315,19 @@ export default function ManagementInterface() {
       {/* Top Navigation */}
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
-          <NavItem active>Quản lý</NavItem>
-          <NavItem>Nghiệp vụ</NavItem>
-          <NavItem>Thống kê</NavItem>
+          {/* <NavItem>Hệ thống</NavItem> */}
+          <NavItem
+            active
+            handleClick={() => handSecondaryNavItemClick(linkNavitem[0].path)}>
+            {linkNavitem[0].label}
+          </NavItem>
+          <NavItem handleClick={() => handleNavItemClick(linkNavitem[1].path)}>
+            {linkNavitem[1].label}
+          </NavItem>
+          <NavItem
+            handleClick={() => handSecondaryNavItemClick(linkNavitem[2].path)}>
+            {linkNavitem[2].label}
+          </NavItem>
         </Toolbar>
       </AppBar>
 

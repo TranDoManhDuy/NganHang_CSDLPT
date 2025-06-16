@@ -27,8 +27,9 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { NavItem } from "@/components/NavItem";
 import { SecondaryNavItem } from "@/components/SecondaryNavItem";
 import axiosInstance from "@/utils/axiosConfig";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { format } from "date-fns";
+import { tr, vi } from "date-fns/locale";
+import { formatDate } from "@/utils/format";
 
 interface Transaction {
   SO_DU_TRUOC: number;
@@ -77,8 +78,14 @@ export default function AccountStatement() {
       const data = response.data.data || [];
       const parsedTransactions = data.map((tx: Transaction) => ({
         ...tx,
-        NGAY: typeof tx.NGAY === "string" ? tx.NGAY : new Date(tx.NGAY).toISOString(),
+        SO_DU_TRUOC: tx.SO_DU_TRUOC,
+
+        NGAY:
+          typeof tx.NGAY === "string"
+            ? tx.NGAY
+            : new Date(tx.NGAY).toISOString(),
       }));
+      console.log("Parsed Transactions:", parsedTransactions);
       setTransactions(parsedTransactions);
     } catch (err: any) {
       setError(err.response?.data?.error || "Đã xảy ra lỗi khi lấy sao kê.");
@@ -110,35 +117,54 @@ export default function AccountStatement() {
         return type;
     }
   };
-
+  const formatVND = (amount: number): string => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f0f0f0" }}>
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
-          <NavItem handleClick={() => handleSecondaryNavItemClick("/management/customers")}>
+          <NavItem
+            handleClick={() =>
+              handleSecondaryNavItemClick("/management/customers")
+            }>
             Quản lý
           </NavItem>
-          <NavItem handleClick={() => handleSecondaryNavItemClick("/operation/deposit_withdrawal")}>
+          <NavItem
+            handleClick={() =>
+              handleSecondaryNavItemClick("/operation/deposit_withdrawal")
+            }>
             Nghiệp vụ
           </NavItem>
-          <NavItem handleClick={() => handleSecondaryNavItemClick("/statistic/account")} active>
+          <NavItem
+            handleClick={() =>
+              handleSecondaryNavItemClick("/statistic/account")
+            }
+            active>
             Thống kê
           </NavItem>
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ display: "flex", borderBottom: "1px solid #d0d0d0", bgcolor: "#fafafa" }}>
+      <Box
+        sx={{
+          display: "flex",
+          borderBottom: "1px solid #d0d0d0",
+          bgcolor: "#fafafa",
+        }}>
         <SecondaryNavItem
           icon={<AccountBalanceIcon />}
           label="Tài khoản"
           onClick={() => handleSecondaryNavItemClick("/statistic/account")}
         />
-        <SecondaryNavItem
+        {/* <SecondaryNavItem
           icon={<GroupIcon />}
           label="Khách hàng"
           onClick={() => handleSecondaryNavItemClick("/statistic/customer")}
-        />
+        /> */}
         <SecondaryNavItem
           icon={<GroupIcon />}
           label="Sao kê"
@@ -158,10 +184,14 @@ export default function AccountStatement() {
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
               error={!!error && !accountNumber}
-              helperText={!!error && !accountNumber ? "Số tài khoản là bắt buộc" : ""}
+              helperText={
+                !!error && !accountNumber ? "Số tài khoản là bắt buộc" : ""
+              }
               sx={{ width: 200 }}
             />
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={vi}>
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={vi}>
               <DatePicker
                 label="Ngày bắt đầu"
                 value={startDate}
@@ -169,7 +199,8 @@ export default function AccountStatement() {
                 slotProps={{
                   textField: {
                     error: !!error && !startDate,
-                    helperText: !!error && !startDate ? "Chọn ngày bắt đầu" : "",
+                    helperText:
+                      !!error && !startDate ? "Chọn ngày bắt đầu" : "",
                     sx: { width: 200 },
                   },
                 }}
@@ -191,11 +222,13 @@ export default function AccountStatement() {
               variant="contained"
               onClick={handleFetchStatement}
               disabled={loading}
-              sx={{ height: 56 }}
-            >
+              sx={{ height: 56 }}>
               {loading ? <CircularProgress size={24} /> : "Tìm kiếm"}
             </Button>
-            <IconButton onClick={handleClear} color="error" sx={{ height: 56, width: 56 }}>
+            <IconButton
+              onClick={handleClear}
+              color="error"
+              sx={{ height: 56, width: 56 }}>
               <ClearIcon />
             </IconButton>
           </Box>
@@ -223,27 +256,15 @@ export default function AccountStatement() {
                   {transactions.map((transaction, index) => (
                     <TableRow key={`${transaction.NGAY}-${index}`}>
                       <TableCell>
-                        {transaction.SO_DU_TRUOC.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
+                        {formatVND(transaction.SO_DU_TRUOC)}
                       </TableCell>
+                      <TableCell>{formatDate(transaction.NGAY)}</TableCell>
                       <TableCell>
-                        {format(parseISO(transaction.NGAY), "dd/MM/yyyy HH:mm:ss", { locale: vi })}
+                        {" "}
+                        {formatTransactionType(transaction.LOAI_GIAO_DICH)}
                       </TableCell>
-                      <TableCell>{formatTransactionType(transaction.LOAI_GIAO_DICH)}</TableCell>
-                      <TableCell>
-                        {transaction.SO_TIEN.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        {transaction.SO_DU_SAU.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
-                      </TableCell>
+                      <TableCell>{formatVND(transaction.SO_TIEN)}</TableCell>
+                      <TableCell>{formatVND(transaction.SO_DU_SAU)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -190,7 +190,7 @@ export const transferMoney: RequestHandler = async (
     ]);
 
     // Check if the stored procedure returned success (return_value = 1)
-    if (result && result[0]?.return_value === 1) {
+    if (result && result[0]?.code == 1) {
       res.status(200).json({
         message: "Money transfer completed successfully",
         data: {

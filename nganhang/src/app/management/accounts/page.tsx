@@ -46,6 +46,15 @@ export default function ManagementInterface() {
     CMND: "",
     macn: "",
   });
+  const linkNavitems = [
+    { label: "Quản lý", path: "/management/customers" },
+    { label: "Nghiệp vụ", path: "operation/deposit_withdrawal" },
+    { label: "Thống kê", path: "/statistic/account" },
+  ];
+  const handleNavItemClick = (path: string) => {
+    // Handle navigation to the selected path
+    window.location.pathname = path;
+  };
   // State to hold the list of accounts
   const [listAccount, setListAccount] = useState([
     {
@@ -148,10 +157,19 @@ export default function ManagementInterface() {
       {/* Top Navigation */}
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
-          <NavItem active>Quản lý</NavItem>
-          <NavItem >Nghiệp vụ</NavItem>
-          <NavItem>Thống kê</NavItem>
+          <NavItem
+            active
+            handleClick={() => handleNavItemClick(linkNavitems[0].path)}>
+            {linkNavitems[0].label}
+          </NavItem>
+          <NavItem
+            handleClick={() => handleNavItemClick(linkNavitems[1].path)}>
+            {linkNavitems[1].label}
+          </NavItem>
+          <NavItem
+            handleClick={() => handleNavItemClick(linkNavitems[2].path)}>
+            {linkNavitems[2].label}
+          </NavItem>
         </Toolbar>
       </AppBar>
 

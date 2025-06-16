@@ -61,6 +61,14 @@ export default function ManagementInterface() {
   // 2. hiển thị form chỉnh sửa nhân viên
   const [statusAdd, setStatusAdd] = useState(0);
   // State to hold the form data
+  const linkNavitem = [
+    { label: "Quản lý", path: "/management/customers" },
+    { label: "Nghiệp vụ", path: "operation/deposit_withdrawal" },
+    { label: "Thống kê", path: "/statistic/account" },
+  ];
+  const handleNavItemClick = (path: string) => {
+    window.location.pathname = path;
+  };
 
   // sử dụng để lấy dữ liệu từ form
   const [formData, setFormData] = useState<Staff>({
@@ -72,7 +80,7 @@ export default function ManagementInterface() {
     PHAI: "",
     SODT: "",
     MACN: "", // Branch code
-    TrangThaiXoa: null
+    TrangThaiXoa: null,
   });
   // State to hold the list of accounts
   const [listStaff, setListStaff] = useState<Staff[]>([]);
@@ -81,7 +89,7 @@ export default function ManagementInterface() {
     const fetchData = async () => {
       try {
         const data = await getAllStaff();
-        console.log(data)
+        console.log(data);
         if (data) {
           setListStaff(data.data);
           setListStaffSearch(data.data);
@@ -106,7 +114,7 @@ export default function ManagementInterface() {
         const data = await getBranches();
         if (data) {
           setListBranch(data.data);
-          handleFieldChange(data.data[0].MACN, "MACN"); 
+          handleFieldChange(data.data[0].MACN, "MACN");
           setSelectedBranch(data.data[0].MACN);
           return;
         }
@@ -139,17 +147,17 @@ export default function ManagementInterface() {
       DIACHI: staff.DIACHI,
       PHAI: staff.PHAI,
       SODT: staff.SODT,
-      MACN: staff.MACN, 
-      TrangThaiXoa: staff.TrangThaiXoa
+      MACN: staff.MACN,
+      TrangThaiXoa: staff.TrangThaiXoa,
     });
     setStatusAdd(2);
   };
 
   const handleSubmit = () => {
-    console.log(formData)
+    console.log(formData);
     if (statusAdd == 1) {
       if (formData.MANV == "") {
-        alert("Mã nhân viên không được để trống")
+        alert("Mã nhân viên không được để trống");
         return;
       }
       if (formData.CMND == "") {
@@ -180,49 +188,25 @@ export default function ManagementInterface() {
         alert("Mã chi nhánh không được để trống");
         return;
       }
-      postStaff(formData)
-        .then((response: any) => {
-          console.log(response)
-          if (response.status == 200) {
-            alert(response.data.message);
-            window.location.reload();
-            setStatusAdd(0);
-            setFormData({
-              MANV: "",
-              HO: "",
-              TEN: "",
-              CMND: "",
-              DIACHI: "",
-              PHAI: "",
-              SODT: "",
-              MACN: "", // Branch code
-              TrangThaiXoa: null
-            });
-          }
-        })
-      // Call the API to add a new customer
-      // postCustomer(formData)
-      //   .then((response: any) => {
-      //     alert(response.data.message);
-      //     window.location.reload();
-      //     setStatusAdd(0);
-      //     setFormData({
-      //       MANV: "",
-      //       HO: "",
-      //       TEN: "",
-      //       CMND: "",
-      //       DIACHI: "",
-      //       PHAI: "",
-      //       SODT: "",
-      //       MACN: "", // Branch code
-      //       TrangThaiXoa: null
-      //     });
-      //     // Optionally, you can reset the form or update the customer list here
-      //   })
-      //   .catch((error) => {
-      //     // console.error("Error adding customer:", error);
-      //     alert(error.message);
-      //   });
+      postStaff(formData).then((response: any) => {
+        console.log(response);
+        if (response.status == 200) {
+          alert(response.data.message);
+          window.location.reload();
+          setStatusAdd(0);
+          setFormData({
+            MANV: "",
+            HO: "",
+            TEN: "",
+            CMND: "",
+            DIACHI: "",
+            PHAI: "",
+            SODT: "",
+            MACN: "", // Branch code
+            TrangThaiXoa: null,
+          });
+        }
+      });
     }
     if (statusAdd == 2) {
       if (formData.CMND == "") {
@@ -253,30 +237,29 @@ export default function ManagementInterface() {
         alert("Mã chi nhánh không được để trống");
         return;
       }
-      if (formData.TrangThaiXoa =! 1 && formData.TrangThaiXoa != 0) {
-        alert("Trạng thái làm việc không được để trống")
-        return
+      if ((formData.TrangThaiXoa = !1 && formData.TrangThaiXoa != 0)) {
+        alert("Trạng thái làm việc không được để trống");
+        return;
       }
-      putStaff(formData)
-        .then((response: any) => {
-          console.log(response)
-          if (response.status == 200) {
-            // alert(response.data.message);
-            // window.location.reload();
-            setStatusAdd(0);
-            setFormData({
-              MANV: "",
-              HO: "",
-              TEN: "",
-              CMND: "",
-              DIACHI: "",
-              PHAI: "",
-              SODT: "",
-              MACN: "", // Branch code
-              TrangThaiXoa: null
-            });
-          }
-        })
+      putStaff(formData).then((response: any) => {
+        console.log(response);
+        if (response.status == 200) {
+          // alert(response.data.message);
+          // window.location.reload();
+          setStatusAdd(0);
+          setFormData({
+            MANV: "",
+            HO: "",
+            TEN: "",
+            CMND: "",
+            DIACHI: "",
+            PHAI: "",
+            SODT: "",
+            MACN: "", // Branch code
+            TrangThaiXoa: null,
+          });
+        }
+      });
       // Call the API to update the customer
       // putCustomer(formData)
       //   .then((response: any) => {
@@ -302,7 +285,7 @@ export default function ManagementInterface() {
       //   });
     }
   };
-  
+
   const handSecondaryNavItemClick = (path: string) => {
     location.href = path;
   };
@@ -317,10 +300,17 @@ export default function ManagementInterface() {
       {/* Top Navigation */}
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
-          <NavItem active>Quản lý</NavItem>
-          <NavItem>Nghiệp vụ</NavItem>
-          <NavItem>Thống kê</NavItem>
+          <NavItem
+            active
+            handleClick={() => handleNavItemClick(linkNavitem[0].path)}>
+            {linkNavitem[0].label}
+          </NavItem>
+          <NavItem handleClick={() => handleNavItemClick(linkNavitem[1].path)}>
+            {linkNavitem[1].label}
+          </NavItem>
+          <NavItem handleClick={() => handleNavItemClick(linkNavitem[2].path)}>
+            {linkNavitem[2].label}
+          </NavItem>
         </Toolbar>
       </AppBar>
 
@@ -439,9 +429,7 @@ export default function ManagementInterface() {
                     staff.TEN.toLowerCase().includes(
                       searchValue.toLowerCase()
                     ) ||
-                    staff.SODT.toLowerCase().includes(
-                      searchValue.toLowerCase()
-                    )
+                    staff.SODT.toLowerCase().includes(searchValue.toLowerCase())
                 );
                 setListStaff(filteredStaff);
                 if (searchValue === "") {
@@ -555,7 +543,7 @@ export default function ManagementInterface() {
                       <TableRow
                         key={item.CMND}
                         onContextMenu={(e) => {
-                          console.log(item)
+                          console.log(item);
                           handleContextMenu(e, item);
                         }}>
                         <TableCell className="mui-table-cell">
@@ -582,13 +570,15 @@ export default function ManagementInterface() {
                         <TableCell className="mui-table-cell">
                           {(() => {
                             if (item.MACN == null) {
-                              return "Trụ sở chính"
+                              return "Trụ sở chính";
                             }
-                            return item.MACN
+                            return item.MACN;
                           })()}
                         </TableCell>
                         <TableCell className="mui-table-cell">
-                          {item.TrangThaiXoa == 1 ? "Đã nghỉ việc":"Còn làm việc"}
+                          {item.TrangThaiXoa == 1
+                            ? "Đã nghỉ việc"
+                            : "Còn làm việc"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -617,15 +607,15 @@ export default function ManagementInterface() {
             </Box>
             <Box
               sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-              { statusAdd == 1 &&
-                (<FormField
-                label="MANV:"
-                type="text"
-                name="MANV"
-                initialValue={formData.MANV}
-                onChange={(value) => handleFieldChange(value, "MANV")}
-                />)
-              }
+              {statusAdd == 1 && (
+                <FormField
+                  label="MANV:"
+                  type="text"
+                  name="MANV"
+                  initialValue={formData.MANV}
+                  onChange={(value) => handleFieldChange(value, "MANV")}
+                />
+              )}
               <FormField
                 label="CMND:"
                 type="text"
@@ -649,7 +639,7 @@ export default function ManagementInterface() {
                 initialValue={formData.TEN}
                 onChange={(value) => handleFieldChange(value, "TEN")}
               />
-              <Box sx={{mb: 2}}>
+              <Box sx={{ mb: 2 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Phái</InputLabel>
                   <Select
@@ -667,7 +657,7 @@ export default function ManagementInterface() {
                   </Select>
                 </FormControl>
               </Box>
-              
+
               <FormField
                 label="Địa chỉ:"
                 type="Text"
@@ -689,17 +679,17 @@ export default function ManagementInterface() {
                   <Select
                     defaultValue={(() => {
                       if (statusAdd == 1) {
-                        return selectedBranch
+                        return selectedBranch;
                       }
-                      return formData.MACN
+                      return formData.MACN;
                     })()}
                     value={(() => {
                       if (statusAdd == 1) {
-                        return selectedBranch
+                        return selectedBranch;
                       }
-                      return formData.MACN
+                      return formData.MACN;
                     })()}
-                    disabled= {true}
+                    disabled={true}
                     label="Mã chi nhánh:"
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
@@ -714,25 +704,26 @@ export default function ManagementInterface() {
                   </Select>
                 </FormControl>
               </Box>
-              <Box sx={{
-                mt: 3
-              }}>
+              <Box
+                sx={{
+                  mt: 3,
+                }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Trạng thái công việc</InputLabel>
                   <Select
-                    disabled = {statusAdd == 1? true : false}
+                    disabled={statusAdd == 1 ? true : false}
                     label="Trạng thái công việc"
                     defaultValue={""}
-                    value={formData.TrangThaiXoa == 1? "1" : "0"}
+                    value={formData.TrangThaiXoa == 1 ? "1" : "0"}
                     sx={{
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "#d0d0d0",
                       },
                     }}
                     onChange={(e) => {
-                      let value = e.target.value == "1"? 1:0
-                      console.log(value)
-                      handleFieldChange(value, "TrangThaiXoa")
+                      let value = e.target.value == "1" ? 1 : 0;
+                      console.log(value);
+                      handleFieldChange(value, "TrangThaiXoa");
                     }}>
                     <MenuItem value="0">Còn làm việc</MenuItem>
                     <MenuItem value="1">Đã nghỉ việc</MenuItem>
@@ -770,7 +761,7 @@ export default function ManagementInterface() {
                       PHAI: "",
                       SODT: "",
                       MACN: "",
-                      TrangThaiXoa: null
+                      TrangThaiXoa: null,
                     });
                   }}
                   sx={{

@@ -172,14 +172,13 @@ export default function TransferNavbars() {
       {/* Top Navigation */}
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
           <NavItem handleClick={() => handSecondaryNavItemClick("/management/customers")}>
             Quản lý
           </NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/operation/deposit_withdrawal")}>
+          <NavItem handleClick={() => handSecondaryNavItemClick("/operation/deposit_withdrawal")} active>
             Nghiệp vụ
           </NavItem>
-          <NavItem>Thống kê</NavItem>
+          <NavItem handleClick={() => handSecondaryNavItemClick("/statistic/account")}>Thống kê</NavItem>
         </Toolbar>
       </AppBar>
 
