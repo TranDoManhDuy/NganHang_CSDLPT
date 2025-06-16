@@ -48,8 +48,8 @@ interface AccountDetails {
 
 export default function DepositWithdrawalNavbars() {
   const [branch, setBranch] = useState<string>("ALL");
-  const [startDate, setStartDate] = useState<Date | null>(new Date("2025-05-05"));
-  const [endDate, setEndDate] = useState<Date | null>(new Date("2025-06-05"));
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [accounts, setAccounts] = useState<AccountDetails[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -92,7 +92,8 @@ export default function DepositWithdrawalNavbars() {
         setAccounts([]);
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || "Đã có lỗi xảy ra khi lấy thống kê";
+      const errorMessage =
+        err.response?.data?.error || "Đã có lỗi xảy ra khi lấy thống kê";
       setError(errorMessage);
       setAccounts([]);
     } finally {
@@ -102,8 +103,8 @@ export default function DepositWithdrawalNavbars() {
 
   const handleClear = () => {
     setBranch("ALL");
-    setStartDate(new Date("2025-05-05"));
-    setEndDate(new Date("2025-06-05"));
+    setStartDate(new Date());
+    setEndDate(new Date());
     setAccounts([]);
     setError("");
     setSuccess("");
@@ -113,14 +114,21 @@ export default function DepositWithdrawalNavbars() {
     <Box sx={{ minHeight: "100vh", bgcolor: "#f0f0f0" }}>
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/management/customers")}>
+          <NavItem
+            handleClick={() =>
+              handSecondaryNavItemClick("/management/customers")
+            }>
             Quản lý
           </NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/operation/deposit_withdrawal")}>
+          <NavItem
+            handleClick={() =>
+              handSecondaryNavItemClick("/operation/deposit_withdrawal")
+            }>
             Nghiệp vụ
           </NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/statistic/account")} active>
+          <NavItem
+            handleClick={() => handSecondaryNavItemClick("/statistic/account")}
+            active>
             Thống kê
           </NavItem>
         </Toolbar>
@@ -131,19 +139,18 @@ export default function DepositWithdrawalNavbars() {
           display: "flex",
           borderBottom: "1px solid #d0d0d0",
           bgcolor: "#fafafa",
-        }}
-      >
+        }}>
         <SecondaryNavItem
           icon={<AccountBalanceIcon />}
           label="Tài khoản"
           active
           onClick={() => handSecondaryNavItemClick("/statistic/account")}
         />
-        <SecondaryNavItem
+        {/* <SecondaryNavItem
           icon={<GroupIcon />}
           label="Khách hàng"
           onClick={() => handSecondaryNavItemClick("/statistic/customer")}
-        />
+        /> */}
         <SecondaryNavItem
           icon={<GroupIcon />}
           label="Sao kê"
@@ -164,8 +171,7 @@ export default function DepositWithdrawalNavbars() {
               flexWrap: "wrap",
               alignItems: "center",
               mb: 3,
-            }}
-          >
+            }}>
             <FormControl sx={{ minWidth: 200 }}>
               <InputLabel id="branch-select-label">Chi nhánh</InputLabel>
               <Select
@@ -173,8 +179,7 @@ export default function DepositWithdrawalNavbars() {
                 value={branch}
                 label="Chi nhánh"
                 onChange={(e) => setBranch(e.target.value as string)}
-                disabled={loading}
-              >
+                disabled={loading}>
                 <MenuItem value="ALL">Tất cả</MenuItem>
                 <MenuItem value="BENTHANH">Bến Thành</MenuItem>
                 <MenuItem value="TANDINH">Tân Định</MenuItem>
@@ -211,8 +216,7 @@ export default function DepositWithdrawalNavbars() {
               color="primary"
               onClick={handleSearch}
               disabled={loading}
-              sx={{ height: 40 }}
-            >
+              sx={{ height: 40 }}>
               Tìm kiếm
             </Button>
             <Button
@@ -221,13 +225,17 @@ export default function DepositWithdrawalNavbars() {
               onClick={handleClear}
               disabled={loading}
               startIcon={<ClearIcon />}
-              sx={{ height: 40 }}
-            >
+              sx={{ height: 40 }}>
               Xóa
             </Button>
           </Box>
 
-          {loading && <CircularProgress size={24} sx={{ my: 2, display: "block", mx: "auto" }} />}
+          {loading && (
+            <CircularProgress
+              size={24}
+              sx={{ my: 2, display: "block", mx: "auto" }}
+            />
+          )}
 
           {error && (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -263,7 +271,9 @@ export default function DepositWithdrawalNavbars() {
                     <TableRow key={index}>
                       <TableCell>{account.SOTK}</TableCell>
                       <TableCell>{account.CMND}</TableCell>
-                      <TableCell>{account.SODU.toLocaleString("vi-VN")} VND</TableCell>
+                      <TableCell>
+                        {account.SODU.toLocaleString("vi-VN")} VND
+                      </TableCell>
                       <TableCell>{account.MACN}</TableCell>
                       <TableCell>
                         {new Date(account.NGAYMOTK).toLocaleDateString("vi-VN")}

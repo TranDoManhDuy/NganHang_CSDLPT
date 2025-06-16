@@ -1,6 +1,5 @@
 "use client";
-import type React from "react";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -11,10 +10,6 @@ import {
   Paper,
   CircularProgress,
   Alert,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Table,
   TableBody,
   TableCell,
@@ -32,37 +27,123 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { NavItem } from "@/components/NavItem";
 import { SecondaryNavItem } from "@/components/SecondaryNavItem";
 import axiosInstance from "@/utils/axiosConfig";
+import { format } from "date-fns";
+import { tr, vi } from "date-fns/locale";
+import { formatDate } from "@/utils/format";
 
-interface AccountDetails {
-  SOTK: string;
-  CMND: string;
-  SODU: number;
-  MACN: string;
-  NGAYMOTK: string;
-  HO: string;
-  TEN: string;
-  DIACHI: string;
-  PHAI: string;
-  SODT: string;
+interface Transaction {
+  SO_DU_TRUOC: number;
+  NGAY: string;
+  LOAI_GIAO_DICH: string;
+  SO_TIEN: number;
+  SO_DU_SAU: number;
 }
 
-export default function DepositWithdrawalNavbars() {
-  const handSecondaryNavItemClick = (path: string) => {
-    location.href = path;
+export default function AccountStatement() {
+  const [accountNumber, setAccountNumber] = useState<string>("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSecondaryNavItemClick = (path: string) => {
+    window.location.href = path;
   };
 
+  const handleFetchStatement = async () => {
+    if (!accountNumber) {
+      setError("Vui lòng nhập số tài khoản.");
+      return;
+    }
+    if (!startDate || !endDate) {
+      setError("Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+      return;
+    }
+    if (startDate > endDate) {
+      setError("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.post("/api/account-statement", {
+        SOTK_SAO_KE: accountNumber,
+        NGAY_BAT_DAU: format(startDate, "yyyy-MM-dd"),
+        NGAY_KET_THUC: format(endDate, "yyyy-MM-dd"),
+      });
+
+      const data = response.data.data || [];
+      const parsedTransactions = data.map((tx: Transaction) => ({
+        ...tx,
+        SO_DU_TRUOC: tx.SO_DU_TRUOC,
+
+        NGAY:
+          typeof tx.NGAY === "string"
+            ? tx.NGAY
+            : new Date(tx.NGAY).toISOString(),
+      }));
+      console.log("Parsed Transactions:", parsedTransactions);
+      setTransactions(parsedTransactions);
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Đã xảy ra lỗi khi lấy sao kê.");
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClear = () => {
+    setAccountNumber("");
+    setStartDate(null);
+    setEndDate(null);
+    setTransactions([]);
+    setError(null);
+  };
+
+  const formatTransactionType = (type: string): string => {
+    switch (type.trim()) {
+      case "GT":
+        return "Gửi tiền";
+      case "RT":
+        return "Rút tiền";
+      case "CT":
+        return "Chuyển tiền";
+      case "NT":
+        return "Nhận tiền";
+      default:
+        return type;
+    }
+  };
+  const formatVND = (amount: number): string => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f0f0f0" }}>
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/management/customers")}>
+          <NavItem
+            handleClick={() =>
+              handleSecondaryNavItemClick("/management/customers")
+            }>
             Quản lý
           </NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/operation/deposit_withdrawal")}>
+          <NavItem
+            handleClick={() =>
+              handleSecondaryNavItemClick("/operation/deposit_withdrawal")
+            }>
             Nghiệp vụ
           </NavItem>
-          <NavItem handleClick={() => handSecondaryNavItemClick("/statistic/account")} active>
+          <NavItem
+            handleClick={() =>
+              handleSecondaryNavItemClick("/statistic/account")
+            }
+            active>
             Thống kê
           </NavItem>
         </Toolbar>
@@ -73,64 +154,53 @@ export default function DepositWithdrawalNavbars() {
           display: "flex",
           borderBottom: "1px solid #d0d0d0",
           bgcolor: "#fafafa",
-        }}
-      >
+        }}>
         <SecondaryNavItem
           icon={<AccountBalanceIcon />}
           label="Tài khoản"
-          active
-          onClick={() => handSecondaryNavItemClick("/statistic/account")}
+          onClick={() => handleSecondaryNavItemClick("/statistic/account")}
         />
-        <SecondaryNavItem
+        {/* <SecondaryNavItem
           icon={<GroupIcon />}
           label="Khách hàng"
-          onClick={() => handSecondaryNavItemClick("/statistic/customer")}
-        />
+          onClick={() => handleSecondaryNavItemClick("/statistic/customer")}
+        /> */}
         <SecondaryNavItem
           icon={<GroupIcon />}
           label="Sao kê"
-          onClick={() => handSecondaryNavItemClick("/statistic/statement")}
+          active
+          onClick={() => handleSecondaryNavItemClick("/statistic/statement")}
         />
       </Box>
 
       <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" gutterBottom>
-            Thống Kê Tài Khoản
+            Sao kê giao dịch
           </Typography>
-
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              flexWrap: "wrap",
-              alignItems: "center",
-              mb: 3,
-            }}
-          >
-            <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel id="branch-select-label">Chi nhánh</InputLabel>
-              <Select
-                labelId="branch-select-label"
-                value={branch}
-                label="Chi nhánh"
-                onChange={(e) => setBranch(e.target.value as string)}
-                disabled={loading}
-              >
-                <MenuItem value="ALL">Tất cả</MenuItem>
-                <MenuItem value="BENTHANH">Bến Thành</MenuItem>
-                <MenuItem value="TANDINH">Tân Định</MenuItem>
-              </Select>
-            </FormControl>
-
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <TextField
+              label="Số tài khoản"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              error={!!error && !accountNumber}
+              helperText={
+                !!error && !accountNumber ? "Số tài khoản là bắt buộc" : ""
+              }
+              sx={{ width: 200 }}
+            />
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={vi}>
               <DatePicker
                 label="Ngày bắt đầu"
                 value={startDate}
-                onChange={(date) => setStartDate(date)}
-                disabled={loading}
+                onChange={(newValue) => setStartDate(newValue)}
                 slotProps={{
                   textField: {
+                    error: !!error && !startDate,
+                    helperText:
+                      !!error && !startDate ? "Chọn ngày bắt đầu" : "",
                     sx: { width: 200 },
                   },
                 }}
@@ -138,88 +208,74 @@ export default function DepositWithdrawalNavbars() {
               <DatePicker
                 label="Ngày kết thúc"
                 value={endDate}
-                onChange={(date) => setEndDate(date)}
-                disabled={loading}
+                onChange={(newValue) => setEndDate(newValue)}
                 slotProps={{
                   textField: {
+                    error: !!error && !endDate,
+                    helperText: !!error && !endDate ? "Chọn ngày kết thúc" : "",
                     sx: { width: 200 },
                   },
                 }}
               />
             </LocalizationProvider>
-
             <Button
               variant="contained"
-              color="primary"
-              onClick={handleSearch}
+              onClick={handleFetchStatement}
               disabled={loading}
-              sx={{ height: 40 }}
-            >
-              Tìm kiếm
+              sx={{ height: 56 }}>
+              {loading ? <CircularProgress size={24} /> : "Tìm kiếm"}
             </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
+            <IconButton
               onClick={handleClear}
-              disabled={loading}
-              startIcon={<ClearIcon />}
-              sx={{ height: 40 }}
-            >
-              Xóa
-            </Button>
+              color="error"
+              sx={{ height: 56, width: 56 }}>
+              <ClearIcon />
+            </IconButton>
           </Box>
-
-          {loading && <CircularProgress size={24} sx={{ my: 2, display: "block", mx: "auto" }} />}
-
           {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
+        </Paper>
 
-          {success && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              {success}
-            </Alert>
-          )}
-
-          {accounts.length > 0 && (
-            <TableContainer component={Paper} sx={{ maxHeight: 400, mt: 3 }}>
-              <Table stickyHeader>
+        <Paper>
+          {transactions.length > 0 ? (
+            <TableContainer>
+              <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Số tài khoản</TableCell>
-                    <TableCell>CMND</TableCell>
-                    <TableCell>Số dư</TableCell>
-                    <TableCell>Chi nhánh</TableCell>
-                    <TableCell>Ngày mở TK</TableCell>
-                    <TableCell>Họ</TableCell>
-                    <TableCell>Tên</TableCell>
-                    <TableCell>Địa chỉ</TableCell>
-                    <TableCell>Giới tính</TableCell>
-                    <TableCell>Số điện thoại</TableCell>
+                    <TableCell>Số dư đầu</TableCell>
+                    <TableCell>Ngày</TableCell>
+                    <TableCell>Loại giao dịch</TableCell>
+                    <TableCell>Số tiền</TableCell>
+                    <TableCell>Số dư sau</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {accounts.map((account, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{account.SOTK}</TableCell>
-                      <TableCell>{account.CMND}</TableCell>
-                      <TableCell>{account.SODU.toLocaleString("vi-VN")} VND</TableCell>
-                      <TableCell>{account.MACN}</TableCell>
+                  {transactions.map((transaction, index) => (
+                    <TableRow key={`${transaction.NGAY}-${index}`}>
                       <TableCell>
-                        {new Date(account.NGAYMOTK).toLocaleDateString("vi-VN")}
+                        {formatVND(transaction.SO_DU_TRUOC)}
                       </TableCell>
-                      <TableCell>{account.HO}</TableCell>
-                      <TableCell>{account.TEN}</TableCell>
-                      <TableCell>{account.DIACHI}</TableCell>
-                      <TableCell>{account.PHAI}</TableCell>
-                      <TableCell>{account.SODT}</TableCell>
+                      <TableCell>{formatDate(transaction.NGAY)}</TableCell>
+                      <TableCell>
+                        {" "}
+                        {formatTransactionType(transaction.LOAI_GIAO_DICH)}
+                      </TableCell>
+                      <TableCell>{formatVND(transaction.SO_TIEN)}</TableCell>
+                      <TableCell>{formatVND(transaction.SO_DU_SAU)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
+          ) : (
+            <Box sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="body1" color="textSecondary">
+                Không có giao dịch
+              </Typography>
+            </Box>
           )}
         </Paper>
       </Box>

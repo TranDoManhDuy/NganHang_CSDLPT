@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import { Box, TextField, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 
-export function FormField({
+export const FormField = memo(({
   label,
   type,
   initialValue = "",
@@ -16,7 +16,7 @@ export function FormField({
   onChange?: (value: string, name?: string) => void;
   name?: string;
   disabled?: boolean;
-}) {
+}) => {
   const [value, setValue] = useState(initialValue);
 
   // Update internal state if initialValue changes
@@ -24,7 +24,7 @@ export function FormField({
     setValue(initialValue);
   }, [initialValue]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value;
 
     // Handle special case for CMND (only allow numeric characters)
@@ -38,7 +38,7 @@ export function FormField({
     if (onChange) {
       onChange(newValue, name);
     }
-  };
+  }, [type, onChange, name]);
 
   return (
     <Box className="form-field">
@@ -51,7 +51,7 @@ export function FormField({
       <TextField
         fullWidth
         size="small"
-        value={value}
+        // value={value}
         name={name}
         type={type === "CMND" ? "text" : type}
         onChange={handleChange}
@@ -62,4 +62,6 @@ export function FormField({
       />
     </Box>
   );
-}
+});
+
+FormField.displayName = 'FormField';

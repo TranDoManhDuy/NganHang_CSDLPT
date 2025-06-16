@@ -138,7 +138,6 @@ export default function DepositWithdrawalNavbars() {
       {/* Top Navigation */}
       <AppBar position="static" sx={{ bgcolor: "#4e6d9c" }}>
         <Toolbar variant="dense" disableGutters>
-          <NavItem>Hệ thống</NavItem>
           <NavItem handleClick={() => handSecondaryNavItemClick("/management/customers")}>
             Quản lý
           </NavItem>

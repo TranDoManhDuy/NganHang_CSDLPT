@@ -64,11 +64,6 @@ export const getAccountByNumber = async (
 ): Promise<void> => {
   try {
     const { sotk } = req.params;
-    if (!sotk || typeof sotk !== "string" || sotk.length !== 9) {
-      res.status(400).json({ error: "Invalid account number" });
-      return;
-    }
-
     const query = `
       DECLARE @return_value INT;
       EXEC @return_value = [dbo].[sp_tim_TK_theo_sotk] @sotk = @sotk;
@@ -100,10 +95,6 @@ export const processDepositWithdrawal: RequestHandler = async (
     const { SOTK, LOAIGD, SOTIEN } = req.body;
 
     // Validate input parameters
-    if (!SOTK || typeof SOTK !== "string" || SOTK.length !== 9) {
-      res.status(400).json({ error: "Invalid account number" });
-      return;
-    }
     if (!LOAIGD || (LOAIGD !== "GT" && LOAIGD !== "RT")) {
       res.status(400).json({ error: "Invalid transaction type (must be 'GT' or 'RT')" });
       return;
@@ -158,28 +149,6 @@ export const transferMoney: RequestHandler = async (
     const { SOTK_CHUYEN, SOTIEN, SOTK_NHAN, MANV } = req.body;
 
     // Validate input parameters
-    if (!SOTK_CHUYEN || typeof SOTK_CHUYEN !== "string" || SOTK_CHUYEN.length !== 9) {
-      const error = new Error("Invalid source account number");
-      console.error({
-        message: error.message,
-        SOTK_CHUYEN,
-        timestamp: new Date().toISOString(),
-        endpoint: "/api/transfer-money",
-      });
-      res.status(400).json({ error: error.message });
-      return;
-    }
-    if (!SOTK_NHAN || typeof SOTK_NHAN !== "string" || SOTK_NHAN.length !== 9) {
-      const error = new Error("Invalid destination account number");
-      console.error({
-        message: error.message,
-        SOTK_NHAN,
-        timestamp: new Date().toISOString(),
-        endpoint: "/api/transfer-money",
-      });
-      res.status(400).json({ error: error.message });
-      return;
-    }
     if (!SOTIEN || typeof SOTIEN !== "number" || SOTIEN <= 0) {
       const error = new Error("Invalid amount (must be a positive number)");
       console.error({
@@ -221,7 +190,7 @@ export const transferMoney: RequestHandler = async (
     ]);
 
     // Check if the stored procedure returned success (return_value = 1)
-    if (result && result[0]?.return_value === 1) {
+    if (result && result[0]?.code == 1) {
       res.status(200).json({
         message: "Money transfer completed successfully",
         data: {
@@ -379,6 +348,97 @@ export const getAccountStatistics: RequestHandler = async (
     // Handle specific errors from the stored procedure
     if (error.message.includes("Chi nhánh không tồn tại")) {
       res.status(400).json({ error: "Branch does not exist" });
+      return;
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getAccountStatement: RequestHandler = async (req: Request, res: Response) => {
+  try {
+    const { SOTK_SAO_KE, NGAY_BAT_DAU, NGAY_KET_THUC } = req.body;
+
+    if (!NGAY_BAT_DAU || !NGAY_KET_THUC || isNaN(Date.parse(NGAY_BAT_DAU)) || isNaN(Date.parse(NGAY_KET_THUC))) {
+      const error = new Error("Invalid date format for NGAY_BAT_DAU or NGAY_KET_THUC");
+      console.error({
+        message: error.message,
+        NGAY_BAT_DAU,
+        NGAY_KET_THUC,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/account-statement",
+      });
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    const startDate = new Date(NGAY_BAT_DAU);
+    const endDate = new Date(NGAY_KET_THUC);
+
+    if (startDate > endDate) {
+      const error = new Error("NGAY_BAT_DAU must be less than or equal to NGAY_KET_THUC");
+      console.error({
+        message: error.message,
+        NGAY_BAT_DAU,
+        NGAY_KET_THUC,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/account-statement",
+      });
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    const query = `
+      DECLARE @return_value INT;
+      EXEC @return_value = [dbo].[sp_sao_ke_tai_khoan]
+        @SOTK_SAO_KE = @SOTK_SAO_KE,
+        @NGAY_BAT_DAU = @NGAY_BAT_DAU,
+        @NGAY_KET_THUC = @NGAY_KET_THUC;
+      SELECT @return_value as return_value;
+    `;
+
+    // Execute the stored procedure
+    const result = await executeQuery(query, [
+      { name: "SOTK_SAO_KE", type: sql.NChar, value: SOTK_SAO_KE },
+      { name: "NGAY_BAT_DAU", type: sql.DateTime, value: startDate },
+      { name: "NGAY_KET_THUC", type: sql.DateTime, value: endDate },
+    ]);
+
+    console.log(result)
+
+    if (result && result.length > 0) {
+      res.status(200).json({
+        message: "Account statement retrieved successfully",
+        data: result,
+      });
+    } else {
+      const error = new Error("Failed to retrieve account statement");
+      console.error({
+        message: error.message,
+        SOTK_SAO_KE,
+        NGAY_BAT_DAU,
+        NGAY_KET_THUC,
+        result,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/account-statement",
+      });
+      res.status(400).json({ error: error.message });
+    }
+  } catch (error: any) {
+    console.error({
+      message: "Error retrieving account statement",
+      error: error.message,
+      stack: error.stack,
+      SOTK_SAO_KE: req.body.SOTK_SAO_KE,
+      NGAY_BAT_DAU: req.body.NGAY_BAT_DAU,
+      NGAY_KET_THUC: req.body.NGAY_KET_THUC,
+      timestamp: new Date().toISOString(),
+      endpoint: "/api/account-statement",
+    });
+
+    // Handle specific errors from the stored procedure
+    if (error.message.includes("Tài khoản không tồn tại")) {
+      res.status(400).json({ error: "Account does not exist" });
       return;
     }
 
