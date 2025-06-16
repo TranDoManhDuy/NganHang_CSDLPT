@@ -1,14 +1,15 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_tim_khach_hang_theo_macn]    Script Date: 6/11/2025 10:44:04 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_tim_khach_hang_theo_macn]    Script Date: 16/6/2025 2:39:07 PM ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[sp_tim_khach_hang_theo_macn]
+
+CREATE OR ALTER   PROCEDURE [dbo].[sp_tim_khach_hang_theo_macn]
     @MACN nchar(10)
 AS
 BEGIN

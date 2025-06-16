@@ -1,7 +1,7 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sua_nhan_vien]    Script Date: 6/11/2025 10:45:19 PM ******/
+/****** Object:  StoredProcedure [dbo].[sua_nhan_vien]    Script Date: 16/6/2025 2:40:01 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE OR ALTER   PROCEDURE [dbo].[sua_nhan_vien] (
+
+CREATE OR ALTER     PROCEDURE [dbo].[sua_nhan_vien] (
 	@MANV nchar(10),
 	@HO nvarchar(40),
 	@TEN nvarchar(10),

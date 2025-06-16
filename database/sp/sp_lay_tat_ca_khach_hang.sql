@@ -1,14 +1,15 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_lay_tat_ca_khach_hang]    Script Date: 6/11/2025 10:41:29 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_lay_tat_ca_khach_hang]    Script Date: 16/6/2025 2:36:53 PM ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[sp_lay_tat_ca_khach_hang]
+
+CREATE OR ALTER   PROCEDURE [dbo].[sp_lay_tat_ca_khach_hang]
 AS
 BEGIN
     SET NOCOUNT ON;

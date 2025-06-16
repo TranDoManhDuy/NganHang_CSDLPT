@@ -1,7 +1,7 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_gui_rut_tien]    Script Date: 6/11/2025 10:41:13 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_gui_rut_tien]    Script Date: 16/6/2025 2:36:44 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE OR ALTER       PROC [dbo].[sp_gui_rut_tien]
+
+CREATE OR ALTER         PROC [dbo].[sp_gui_rut_tien]
     @SOTK nchar(9),
     @LOAIGD nchar(10) = 'GT',
     @SOTIEN money,

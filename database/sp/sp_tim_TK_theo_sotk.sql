@@ -1,7 +1,7 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_tim_TK_theo_sotk]    Script Date: 6/11/2025 10:44:27 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_tim_TK_theo_sotk]    Script Date: 16/6/2025 2:39:23 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE OR ALTER       PROC [dbo].[sp_tim_TK_theo_sotk] @sotk CHAR(9)
+
+CREATE OR ALTER         PROC [dbo].[sp_tim_TK_theo_sotk] @sotk CHAR(9)
 AS
 BEGIN
     SET NOCOUNT ON;

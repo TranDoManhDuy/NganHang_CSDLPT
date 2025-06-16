@@ -1,14 +1,16 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_tim_khach_hang]    Script Date: 6/11/2025 10:43:38 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_tim_khach_hang]    Script Date: 16/6/2025 2:38:58 PM ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[sp_tim_khach_hang]
+
+
+CREATE OR ALTER     PROCEDURE [dbo].[sp_tim_khach_hang]
     @CMND nchar(10)
 AS
 BEGIN
@@ -22,7 +24,8 @@ BEGIN
         )
         BEGIN
             SELECT 
-              [HO]
+            [CMND]
+            ,  [HO]
             , [TEN]
             , [DIACHI]
             , [PHAI]
@@ -36,7 +39,8 @@ BEGIN
         END
 
         SELECT
-          [HO]
+         [CMND]
+        , [HO]
         , [TEN]
         , [DIACHI]
         , [PHAI]

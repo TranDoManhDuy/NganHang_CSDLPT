@@ -1,7 +1,7 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[xem_toan_bo_nhan_vien]    Script Date: 6/11/2025 10:46:39 PM ******/
+/****** Object:  StoredProcedure [dbo].[xem_toan_bo_nhan_vien]    Script Date: 16/6/2025 2:40:39 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE OR ALTER   PROCEDURE [dbo].[xem_toan_bo_nhan_vien]
+
+CREATE OR ALTER     PROCEDURE [dbo].[xem_toan_bo_nhan_vien]
 AS
 BEGIN
 	/**

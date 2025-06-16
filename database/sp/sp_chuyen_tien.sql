@@ -1,7 +1,7 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_chuyen_tien]    Script Date: 6/11/2025 10:40:44 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_chuyen_tien]    Script Date: 16/6/2025 2:36:18 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE OR ALTER     PROC [dbo].[sp_chuyen_tien]
+
+CREATE OR ALTER       PROC [dbo].[sp_chuyen_tien]
     @SOTK_CHUYEN NCHAR(9),
     @SOTIEN MONEY,
     @SOTK_NHAN NCHAR(9),

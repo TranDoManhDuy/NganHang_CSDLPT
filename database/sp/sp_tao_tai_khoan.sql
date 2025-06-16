@@ -1,7 +1,7 @@
 USE [NGANHANG]
 GO
 
-/****** Object:  StoredProcedure [dbo].[sp_tao_tai_khoan]    Script Date: 6/11/2025 10:42:39 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_tao_tai_khoan]    Script Date: 16/6/2025 2:38:25 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -11,7 +11,8 @@ GO
 
 
 
-CREATE OR ALTER             PROC [dbo].[sp_tao_tai_khoan]
+
+CREATE OR ALTER               PROC [dbo].[sp_tao_tai_khoan]
     @CMND nchar(10),
     @macn nchar(10)
 AS
