@@ -2,6 +2,9 @@
 
 import type React from "react";
 import { useState, useEffect, useCallback } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   AppBar,
   Toolbar,
@@ -46,6 +49,19 @@ import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as 
 
 import { convertToDate } from "@/utils/convert"; // Adjust the import path as necessary
 
+// Schema validation cho form
+const customerSchema = z.object({
+  CMND: z.string().min(1, "CMND không được để trống"),
+  HO: z.string().min(1, "Họ không được để trống"),
+  TEN: z.string().min(1, "Tên không được để trống"),
+  DIACHI: z.string().min(1, "Địa chỉ không được để trống"),
+  PHAI: z.string().min(1, "Phái không được để trống"),
+  SODT: z.string().min(1, "Số điện thoại không được để trống"),
+  MACN: z.string().min(1, "Mã chi nhánh không được để trống"),
+});
+
+type FormData = z.infer<typeof customerSchema>;
+
 export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [statusAdd, setStatusAdd] = useState(0);
@@ -59,26 +75,23 @@ export default function ManagementInterface() {
     window.location.pathname = path;
   };
 
-  // State to hold the form data
-  interface FormData {
-    CMND: string; // ID card number
-    HO: string; // Last name
-    TEN: string; // First name
-    DIACHI: string; // Address
-    PHAI: string;
-    SODT: string; // Phone number
-    MACN: string; // Branch code
-  }
-
-  const [formData, setFormData] = useState<FormData>({
-    CMND: "",
-    HO: "",
-    TEN: "",
-    DIACHI: "",
-    PHAI: "",
-    SODT: "",
-    MACN: "", // Branch code
-    // You can add more fields as needed
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(customerSchema),
+    defaultValues: {
+      CMND: "",
+      HO: "",
+      TEN: "",
+      DIACHI: "",
+      PHAI: "",
+      SODT: "",
+      MACN: "",
+    },
   });
   // State to hold the list of accounts
   const [listCustomer, setListCustomer] = useState([
@@ -146,72 +159,31 @@ export default function ManagementInterface() {
   //
   // Function to handle field changes
   // This function updates the formData state when a field changes
-  const handleFieldChange = useCallback((value: any, fieldName: any) => {
-    setFormData((prevData) => ({ ...prevData, [fieldName]: value }));
-  }, []);
+  const handleFieldChange = useCallback(
+    (value: any, fieldName: any) => {
+      setValue(fieldName, value);
+    },
+    [setValue]
+  );
 
   const handleContextMenu = (event: React.MouseEvent, account: FormData) => {
     event.preventDefault();
     console.log("Right-clicked on row");
     // Handle right-click event here
-    setFormData({
-      CMND: account.CMND,
-      HO: account.HO,
-      TEN: account.TEN,
-      DIACHI: account.DIACHI,
-      PHAI: account.PHAI,
-      SODT: account.SODT,
-      MACN: account.MACN,
-    });
+    reset(account);
     setStatusAdd(2);
   };
 
-  const handleSubmit = () => {
+  const handleSubmitForm = (data: FormData) => {
+    console.log(data);
     if (statusAdd == 1) {
-      if (formData.CMND == "") {
-        alert("CMND không được để trống");
-        return;
-      }
-      if (formData.HO == "") {
-        alert("Họ không được để trống");
-        return;
-      }
-      if (formData.TEN == "") {
-        alert("Tên không được để trống");
-        return;
-      }
-      if (formData.DIACHI == "") {
-        alert("Địa chỉ không được để trống");
-        return;
-      }
-      if (formData.PHAI == "") {
-        alert("Phái không được để trống");
-        return;
-      }
-      if (formData.SODT == "") {
-        alert("Số điện thoại không được để trống");
-        return;
-      }
-      if (formData.MACN == "") {
-        alert("Mã chi nhánh không được để trống");
-        return;
-      }
       // Call the API to add a new customer
-      postCustomer(formData)
+      postCustomer(data)
         .then((response: any) => {
           alert(response.data.message);
           window.location.reload();
           setStatusAdd(0);
-          setFormData({
-            CMND: "",
-            HO: "",
-            TEN: "",
-            DIACHI: "",
-            PHAI: "",
-            SODT: "",
-            MACN: "", // Branch code
-          });
-          // Optionally, you can reset the form or update the customer list here
+          reset();
         })
         .catch((error) => {
           // console.error("Error adding customer:", error);
@@ -219,51 +191,14 @@ export default function ManagementInterface() {
         });
     }
     if (statusAdd == 2 && statusDelete == false) {
-      if (formData.CMND == "") {
-        alert("CMND không được để trống");
-        return;
-      }
-      if (formData.HO == "") {
-        alert("Họ không được để trống");
-        return;
-      }
-      if (formData.TEN == "") {
-        alert("Tên không được để trống");
-        return;
-      }
-      if (formData.DIACHI == "") {
-        alert("Địa chỉ không được để trống");
-        return;
-      }
-      if (formData.PHAI == "") {
-        alert("Phái không được để trống");
-        return;
-      }
-      if (formData.SODT == "") {
-        alert("Số điện thoại không được để trống");
-        return;
-      }
-      if (formData.MACN == "") {
-        alert("Mã chi nhánh không được để trống");
-        return;
-      }
       // Call the API to update the customer
-      console.log(formData);
-      putCustomer(formData)
+      console.log(data);
+      putCustomer(data)
         .then((response: any) => {
           alert(response.data.message);
           window.location.reload();
           setStatusAdd(0);
-          setFormData({
-            CMND: "",
-            HO: "",
-            TEN: "",
-            DIACHI: "",
-            PHAI: "",
-            SODT: "",
-            MACN: "", // Branch code
-          });
-          // Optionally, you can reset the form or update the customer list here
+          reset();
         })
         .catch((error) => {
           // console.error("Error updating customer:", error);
@@ -278,21 +213,12 @@ export default function ManagementInterface() {
         return;
       }
       // Call the API to delete the customer
-      deleteCustomer(formData.CMND)
+      deleteCustomer(data.CMND)
         .then((response: any) => {
           alert(response.data.message);
           window.location.reload();
           setStatusAdd(0);
-          setFormData({
-            CMND: "",
-            HO: "",
-            TEN: "",
-            DIACHI: "",
-            PHAI: "",
-            SODT: "",
-            MACN: "", // Branch code
-          });
-          // Optionally, you can reset the form or update the customer list here
+          reset();
         })
         .catch((error) => {
           // console.error("Error deleting customer:", error);
@@ -625,7 +551,7 @@ export default function ManagementInterface() {
 
         {/* Customer Form */}
         <form
-          action={handleSubmit}
+          onSubmit={handleSubmit(handleSubmitForm)}
           style={{ display: statusAdd == 0 ? "none" : "" }}>
           <Paper sx={{ width: 350, border: "1px solid #d0d0d0" }}>
             <Box
@@ -646,41 +572,37 @@ export default function ManagementInterface() {
                 label="CMND:"
                 type="CMND"
                 name="CMND"
-                initialValue={formData.CMND}
-                onChange={handleFieldChange}
+                control={control}
                 disabled={statusAdd == 2 ? true : false}
               />
 
-              <FormField
-                label="Họ:"
-                type="Text"
-                name="HO"
-                initialValue={formData.HO}
-                onChange={handleFieldChange}
-              />
+              <FormField label="Họ:" type="Text" name="HO" control={control} />
               <FormField
                 label="Tên:"
                 type="Text"
                 name="TEN"
-                initialValue={formData.TEN}
-                onChange={handleFieldChange}
+                control={control}
               />
               <Box>
                 <FormControl fullWidth size="small">
                   <InputLabel>Phái:</InputLabel>
-                  <Select
-                    label="Phái:"
-                    defaultValue={""}
-                    value={formData.PHAI}
-                    sx={{
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d0d0d0",
-                      },
-                    }}
-                    onChange={(e) => handleFieldChange(e.target.value, "PHAI")}>
-                    <MenuItem value="Nam">Nam</MenuItem>
-                    <MenuItem value="Nữ">Nữ</MenuItem>
-                  </Select>
+                  <Controller
+                    name="PHAI"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        label="Phái:"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#d0d0d0",
+                          },
+                        }}>
+                        <MenuItem value="Nam">Nam</MenuItem>
+                        <MenuItem value="Nữ">Nữ</MenuItem>
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
 
@@ -688,37 +610,39 @@ export default function ManagementInterface() {
                 label="Địa chỉ:"
                 type="Text"
                 name="DIACHI"
-                initialValue={formData.DIACHI}
-                onChange={handleFieldChange}
+                control={control}
               />
               <FormField
                 label="Số điện thoại:"
                 type="Text"
                 name="SODT"
-                initialValue={formData.SODT}
-                onChange={handleFieldChange}
+                control={control}
               />
 
               <Box>
                 <FormControl fullWidth size="small">
                   <InputLabel>Mã chi nhánh:</InputLabel>
-                  <Select
-                    defaultValue={""}
-                    value={formData.MACN}
-                    disabled={statusAdd == 2 ? true : false}
-                    label="Mã chi nhánh:"
-                    onChange={(e) => handleFieldChange(e.target.value, "MACN")}
-                    sx={{
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d0d0d0",
-                      },
-                    }}>
-                    {listBranch.map((item, index) => (
-                      <MenuItem key={index} value={item.MACN}>
-                        {item.TENCN}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <Controller
+                    name="MACN"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        disabled={statusAdd == 2 ? true : false}
+                        label="Mã chi nhánh:"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#d0d0d0",
+                          },
+                        }}>
+                        {listBranch.map((item, index) => (
+                          <MenuItem key={index} value={item.MACN}>
+                            {item.TENCN}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
 
@@ -754,15 +678,7 @@ export default function ManagementInterface() {
                   className="button-cancel"
                   onClick={() => {
                     setStatusAdd(0);
-                    setFormData({
-                      CMND: "",
-                      HO: "",
-                      TEN: "",
-                      DIACHI: "",
-                      PHAI: "",
-                      SODT: "",
-                      MACN: "", // Branch code
-                    });
+                    reset();
                   }}
                   sx={{
                     borderColor: "#d0d0d0",

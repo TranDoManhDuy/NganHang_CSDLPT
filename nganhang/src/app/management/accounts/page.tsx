@@ -2,6 +2,9 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   AppBar,
   Toolbar,
@@ -39,23 +42,17 @@ import { getAllAccount, postAccount } from "@/utils/accountAPI"; // Adjust the i
 
 import { getBranches } from "@/utils/branchesAPI"; // Adjust the import path as necessary
 
+// Schema validation cho form
+const accountSchema = z.object({
+  CMND: z.string().min(1, "CMND không được để trống"),
+  macn: z.string().min(1, "Mã chi nhánh không được để trống"),
+});
+
+type FormData = z.infer<typeof accountSchema>;
+
 export default function ManagementInterface() {
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [statusAdd, setStatusAdd] = useState(false);
-  const [formData, setFormData] = useState({
-    CMND: "",
-    macn: "",
-  });
-  const linkNavitems = [
-    { label: "Quản lý", path: "/management/customers" },
-    { label: "Nghiệp vụ", path: "operation/deposit_withdrawal" },
-    { label: "Thống kê", path: "/statistic/account" },
-  ];
-  const handleNavItemClick = (path: string) => {
-    // Handle navigation to the selected path
-    window.location.pathname = path;
-  };
-  // State to hold the list of accounts
   const [listAccount, setListAccount] = useState([
     {
       SOTK: "123456789",
@@ -74,6 +71,35 @@ export default function ManagementInterface() {
       NGAYMOTK: "2023-01-01",
     },
   ]);
+  const [listBranch, setListBranch] = useState([
+    {
+      MACN: "CN001",
+      TENCN: "Chi nhánh 1",
+    },
+  ]);
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(accountSchema),
+    defaultValues: {
+      CMND: "",
+      macn: "",
+    },
+  });
+
+  const linkNavitems = [
+    { label: "Quản lý", path: "/management/customers" },
+    { label: "Nghiệp vụ", path: "operation/deposit_withdrawal" },
+    { label: "Thống kê", path: "/statistic/account" },
+  ];
+  const handleNavItemClick = (path: string) => {
+    // Handle navigation to the selected path
+    window.location.pathname = path;
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -86,13 +112,6 @@ export default function ManagementInterface() {
     };
     fetchData();
   }, []);
-  // State to hold the list of branches
-  const [listBranch, setListBranch] = useState([
-    {
-      MACN: "CN001",
-      TENCN: "Chi nhánh 1",
-    },
-  ]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -110,26 +129,14 @@ export default function ManagementInterface() {
   }, []);
   //
   const handleFieldChange = (value: any, fieldName: any) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldName]: value,
-    }));
+    setValue(fieldName, value);
   };
-  const handleSubmit = () => {
-    if (!formData.CMND || !formData.macn) {
-      alert("Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
-
-    postAccount(formData)
+  const handleSubmitForm = (data: FormData) => {
+    postAccount(data)
       .then((response) => {
         alert(response.data.message);
         window.location.reload();
         setStatusAdd(false);
-        setFormData({
-          CMND: "",
-          macn: "",
-        });
       })
       .catch((error) => {
         alert(error.message);
@@ -138,11 +145,6 @@ export default function ManagementInterface() {
   //
 
   const handSecondaryNavItemClick = (path: string) => {
-    // Handle navigation to the selected path
-    // For example, using React Router's useHistory or useNavigate
-    // history.push(path);
-    // or
-    // navigate(path);
     location.href = path;
   };
   const handleContextMenu = (event: React.MouseEvent, account: Object) => {};
@@ -415,7 +417,7 @@ export default function ManagementInterface() {
 
         {/* Customer Form */}
         <form
-          action={handleSubmit}
+          onSubmit={handleSubmit(handleSubmitForm)}
           style={{ display: statusAdd ? "block" : "none" }}>
           <Paper sx={{ width: 350, border: "1px solid #d0d0d0" }}>
             <Box
@@ -435,56 +437,34 @@ export default function ManagementInterface() {
                 label="CMND:"
                 type="CMND"
                 name="CMND"
-                initialValue={formData.CMND}
-                onChange={handleFieldChange}
+                control={control}
               />
-
-              {/* <Box>
-              <FormControl fullWidth size="small">
-                <InputLabel>Phái:</InputLabel>
-                <Select
-                  label="Phái:"
-                  sx={{
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#d0d0d0",
-                    },
-                  }}>
-                  <MenuItem value="male">Nam</MenuItem>
-                  <MenuItem value="female">Nữ</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            <FormField label="Số điện thoại:" /> */}
 
               <Box>
                 <FormControl fullWidth size="small">
                   <InputLabel>Mã chi nhánh:</InputLabel>
-                  <Select
-                    defaultValue={""}
-                    value={formData.macn}
-                    label="Mã chi nhánh:"
-                    onChange={(e) => handleFieldChange(e.target.value, "macn")}
-                    sx={{
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d0d0d0",
-                      },
-                    }}>
-                    {listBranch.map((item, index) => (
-                      <MenuItem key={index} value={item.MACN}>
-                        {item.TENCN}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <Controller
+                    name="macn"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        label="Mã chi nhánh:"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#d0d0d0",
+                          },
+                        }}>
+                        {listBranch.map((item, index) => (
+                          <MenuItem key={index} value={item.MACN}>
+                            {item.TENCN}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
-
-              {/* <Box display={{ display: statusAdd === 2 ? "" : "none" }}>
-                <FormControlLabel
-                  control={<Checkbox />}
-                  label="Trạng thái xóa"
-                />
-              </Box> */}
 
               <Box
                 sx={{

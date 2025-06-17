@@ -28,6 +28,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import GroupIcon from "@mui/icons-material/Group";
+import { useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 // Import the customers-specific CSS
 import "./page.css";
@@ -70,17 +72,23 @@ export default function ManagementInterface() {
     window.location.pathname = path;
   };
 
-  // sử dụng để lấy dữ liệu từ form
-  const [formData, setFormData] = useState<Staff>({
-    MANV: "",
-    HO: "",
-    TEN: "",
-    CMND: "",
-    DIACHI: "",
-    PHAI: "",
-    SODT: "",
-    MACN: "", // Branch code
-    TrangThaiXoa: null,
+  const {
+    control,
+    handleSubmit: handleFormSubmit,
+    reset,
+    setValue,
+  } = useForm<Staff>({
+    defaultValues: {
+      MANV: "",
+      HO: "",
+      TEN: "",
+      CMND: "",
+      DIACHI: "",
+      PHAI: "",
+      SODT: "",
+      MACN: "",
+      TrangThaiXoa: "0",
+    },
   });
   // State to hold the list of accounts
   const [listStaff, setListStaff] = useState<Staff[]>([]);
@@ -114,7 +122,7 @@ export default function ManagementInterface() {
         const data = await getBranches();
         if (data) {
           setListBranch(data.data);
-          handleFieldChange(data.data[0].MACN, "MACN");
+          setValue("MACN", data.data[0].MACN);
           setSelectedBranch(data.data[0].MACN);
           return;
         }
@@ -128,161 +136,116 @@ export default function ManagementInterface() {
   // Function to handle field changes
   // This function updates the formData state when a field changes
   const handleFieldChange = (value: any, fieldName: keyof Staff) => {
-    setFormData((prevData) => {
-      const newData = {
-        ...prevData,
-        [fieldName]: value,
-      };
-      return newData;
-    });
+    setValue(fieldName, value);
   };
 
   const handleContextMenu = (event: React.MouseEvent, staff: Staff) => {
     event.preventDefault();
-    setFormData({
-      MANV: staff.MANV,
-      HO: staff.HO,
-      TEN: staff.TEN,
-      CMND: staff.CMND,
-      DIACHI: staff.DIACHI,
-      PHAI: staff.PHAI,
-      SODT: staff.SODT,
-      MACN: staff.MACN,
-      TrangThaiXoa: staff.TrangThaiXoa,
-    });
+    setValue("MANV", staff.MANV);
+    setValue("HO", staff.HO);
+    setValue("TEN", staff.TEN);
+    setValue("CMND", staff.CMND);
+    setValue("DIACHI", staff.DIACHI);
+    setValue("PHAI", staff.PHAI);
+    setValue("SODT", staff.SODT);
+    setValue("MACN", staff.MACN);
+    setValue(
+      "TrangThaiXoa",
+      staff.TrangThaiXoa == null ? "0" : String(staff.TrangThaiXoa)
+    );
     setStatusAdd(2);
   };
 
-  const handleSubmit = () => {
-    console.log(formData);
+  const onSubmit = (data: Staff) => {
     if (statusAdd == 1) {
-      if (formData.MANV == "") {
+      if (data.MANV == "") {
         alert("Mã nhân viên không được để trống");
         return;
       }
-      if (formData.CMND == "") {
+      if (data.CMND == "") {
         alert("CMND không được để trống");
         return;
       }
-      if (formData.HO == "") {
+      if (data.HO == "") {
         alert("Họ không được để trống");
         return;
       }
-      if (formData.TEN == "") {
+      if (data.TEN == "") {
         alert("Tên không được để trống");
         return;
       }
-      if (formData.DIACHI == "") {
+      if (data.DIACHI == "") {
         alert("Địa chỉ không được để trống");
         return;
       }
-      if (formData.PHAI == "") {
+      if (data.PHAI == "") {
         alert("Phái không được để trống");
         return;
       }
-      if (formData.SODT == "") {
+      if (data.SODT == "") {
         alert("Số điện thoại không được để trống");
         return;
       }
-      if (formData.MACN == "") {
+      if (data.MACN == "") {
         alert("Mã chi nhánh không được để trống");
         return;
       }
-      postStaff(formData).then((response: any) => {
+      postStaff(data).then((response: any) => {
         console.log(response);
         if (response.status == 200) {
           alert(response.data.message);
           window.location.reload();
           setStatusAdd(0);
-          setFormData({
-            MANV: "",
-            HO: "",
-            TEN: "",
-            CMND: "",
-            DIACHI: "",
-            PHAI: "",
-            SODT: "",
-            MACN: "", // Branch code
-            TrangThaiXoa: null,
-          });
+          reset();
         }
       });
     }
     if (statusAdd == 2) {
-      if (formData.CMND == "") {
+      if (data.CMND == "") {
         alert("CMND không được để trống");
         return;
       }
-      if (formData.HO == "") {
+      if (data.HO == "") {
         alert("Họ không được để trống");
         return;
       }
-      if (formData.TEN == "") {
+      if (data.TEN == "") {
         alert("Tên không được để trống");
         return;
       }
-      if (formData.DIACHI == "") {
+      if (data.DIACHI == "") {
         alert("Địa chỉ không được để trống");
         return;
       }
-      if (formData.PHAI == "") {
+      if (data.PHAI == "") {
         alert("Phái không được để trống");
         return;
       }
-      if (formData.SODT == "") {
+      if (data.SODT == "") {
         alert("Số điện thoại không được để trống");
         return;
       }
-      if (formData.MACN == "") {
+      if (data.MACN == "") {
         alert("Mã chi nhánh không được để trống");
         return;
       }
-      if ((formData.TrangThaiXoa = !1 && formData.TrangThaiXoa != 0)) {
+      if ((data.TrangThaiXoa = !1 && data.TrangThaiXoa != 0)) {
         alert("Trạng thái làm việc không được để trống");
         return;
       }
-      putStaff(formData).then((response: any) => {
-        console.log(response);
-        if (response.status == 200) {
-          // alert(response.data.message);
-          // window.location.reload();
-          setStatusAdd(0);
-          setFormData({
-            MANV: "",
-            HO: "",
-            TEN: "",
-            CMND: "",
-            DIACHI: "",
-            PHAI: "",
-            SODT: "",
-            MACN: "", // Branch code
-            TrangThaiXoa: null,
-          });
-        }
-      });
-      // Call the API to update the customer
-      // putCustomer(formData)
-      //   .then((response: any) => {
-      //     alert(response.data.message);
-      //     window.location.reload();
-      //     setStatusAdd(0);
-      //     setFormData({
-      //       MANV: "",
-      //       HO: "",
-      //       TEN: "",
-      //       CMND: "",
-      //       DIACHI: "",
-      //       PHAI: "",
-      //       SODT: "",
-      //       MACN: "", // Branch code
-      //       TrangThaiXoa: null
-      //     });
-      //     // Optionally, you can reset the form or update the customer list here
-      //   })
-      //   .catch((error) => {
-      //     // console.error("Error updating customer:", error);
-      //     alert(error.message);
-      //   });
+      putStaff(data)
+        .then((response: any) => {
+          console.log(response);
+          if (response.status == 200) {
+            alert(response.data.message);
+            window.location.reload();
+            setStatusAdd(0);
+            reset();
+          }
+        })
+        .catch((error: any) => {
+          alert(error.response.data.message);
+        });
     }
   };
 
@@ -591,7 +554,7 @@ export default function ManagementInterface() {
 
         {/* Customer Form */}
         <form
-          action={handleSubmit}
+          onSubmit={handleFormSubmit(onSubmit)}
           style={{ display: statusAdd == 0 ? "none" : "" }}>
           <Paper sx={{ width: 350, border: "1px solid #d0d0d0" }}>
             <Box
@@ -612,96 +575,83 @@ export default function ManagementInterface() {
                   label="MANV:"
                   type="text"
                   name="MANV"
-                  initialValue={formData.MANV}
-                  onChange={(value) => handleFieldChange(value, "MANV")}
+                  control={control}
                 />
               )}
               <FormField
                 label="CMND:"
                 type="text"
                 name="CMND"
-                initialValue={formData.CMND}
-                onChange={(value) => handleFieldChange(value, "CMND")}
-                // disabled={statusAdd == 2 ? true : false}
+                control={control}
               />
 
-              <FormField
-                label="Họ:"
-                type="text"
-                name="HO"
-                initialValue={formData.HO}
-                onChange={(value) => handleFieldChange(value, "HO")}
-              />
+              <FormField label="Họ:" type="text" name="HO" control={control} />
               <FormField
                 label="Tên:"
                 type="text"
                 name="TEN"
-                initialValue={formData.TEN}
-                onChange={(value) => handleFieldChange(value, "TEN")}
+                control={control}
               />
               <Box sx={{ mb: 2 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Phái</InputLabel>
-                  <Select
-                    label="Phái"
-                    defaultValue={""}
-                    value={formData.PHAI}
-                    sx={{
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d0d0d0",
-                      },
-                    }}
-                    onChange={(e) => handleFieldChange(e.target.value, "PHAI")}>
-                    <MenuItem value="Nam">Nam</MenuItem>
-                    <MenuItem value="Nữ">Nữ</MenuItem>
-                  </Select>
+                  <Controller
+                    name="PHAI"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        label="Phái"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#d0d0d0",
+                          },
+                        }}>
+                        <MenuItem value="Nam">Nam</MenuItem>
+                        <MenuItem value="Nữ">Nữ</MenuItem>
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
 
               <FormField
                 label="Địa chỉ:"
-                type="Text"
+                type="text"
                 name="DIACHI"
-                initialValue={formData.DIACHI}
-                onChange={(value) => handleFieldChange(value, "DIACHI")}
+                control={control}
               />
               <FormField
                 label="Số điện thoại:"
-                type="Text"
+                type="text"
                 name="SODT"
-                initialValue={formData.SODT}
-                onChange={(value) => handleFieldChange(value, "SODT")}
+                control={control}
               />
 
               <Box>
                 <FormControl fullWidth size="small">
                   <InputLabel>Mã chi nhánh:</InputLabel>
-                  <Select
-                    defaultValue={(() => {
-                      if (statusAdd == 1) {
-                        return selectedBranch;
-                      }
-                      return formData.MACN;
-                    })()}
-                    value={(() => {
-                      if (statusAdd == 1) {
-                        return selectedBranch;
-                      }
-                      return formData.MACN;
-                    })()}
-                    disabled={true}
-                    label="Mã chi nhánh:"
-                    sx={{
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d0d0d0",
-                      },
-                    }}>
-                    {listBranch.map((item, index) => (
-                      <MenuItem key={index} value={item.MACN}>
-                        {item.TENCN}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <Controller
+                    name="MACN"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        disabled={true}
+                        label="Mã chi nhánh:"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#d0d0d0",
+                          },
+                        }}>
+                        {listBranch.map((item, index) => (
+                          <MenuItem key={index} value={item.MACN}>
+                            {item.TENCN}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
               <Box
@@ -710,24 +660,29 @@ export default function ManagementInterface() {
                 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Trạng thái công việc</InputLabel>
-                  <Select
-                    disabled={statusAdd == 1 ? true : false}
-                    label="Trạng thái công việc"
-                    defaultValue={""}
-                    value={formData.TrangThaiXoa == 1 ? "1" : "0"}
-                    sx={{
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d0d0d0",
-                      },
-                    }}
-                    onChange={(e) => {
-                      let value = e.target.value == "1" ? 1 : 0;
-                      console.log(value);
-                      handleFieldChange(value, "TrangThaiXoa");
-                    }}>
-                    <MenuItem value="0">Còn làm việc</MenuItem>
-                    <MenuItem value="1">Đã nghỉ việc</MenuItem>
-                  </Select>
+                  <Controller
+                    name="TrangThaiXoa"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        value={field.value == null ? "0" : String(field.value)}
+                        disabled={statusAdd == 1 ? true : false}
+                        label="Trạng thái công việc"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#d0d0d0",
+                          },
+                        }}
+                        onChange={(e) => {
+                          let value = e.target.value == "1" ? "1" : "0";
+                          field.onChange(value);
+                        }}>
+                        <MenuItem value="0">Còn làm việc</MenuItem>
+                        <MenuItem value="1">Đã nghỉ việc</MenuItem>
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
               <Box
@@ -752,17 +707,7 @@ export default function ManagementInterface() {
                   className="button-cancel"
                   onClick={() => {
                     setStatusAdd(0);
-                    setFormData({
-                      MANV: "",
-                      HO: "",
-                      TEN: "",
-                      CMND: "",
-                      DIACHI: "",
-                      PHAI: "",
-                      SODT: "",
-                      MACN: "",
-                      TrangThaiXoa: null,
-                    });
+                    reset();
                   }}
                   sx={{
                     borderColor: "#d0d0d0",
