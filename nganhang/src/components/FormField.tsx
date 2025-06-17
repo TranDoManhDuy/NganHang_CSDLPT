@@ -1,45 +1,20 @@
-import React, { memo, useCallback } from "react";
+import React, { memo } from "react";
 import { Box, TextField, Typography } from "@mui/material";
-import { useState, useEffect } from "react";
+import { Controller, Control } from "react-hook-form";
 
 export const FormField = memo(({
   label,
   type,
-  initialValue = "",
-  onChange,
   name,
+  control,
   disabled = false,
 }: {
   label: string;
   type: string;
-  initialValue?: string;
-  onChange?: (value: string, name?: string) => void;
-  name?: string;
+  name: string;
+  control: Control<any>;
   disabled?: boolean;
 }) => {
-  const [value, setValue] = useState(initialValue);
-
-  // Update internal state if initialValue changes
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = e.target.value;
-
-    // Handle special case for CMND (only allow numeric characters)
-    if (type === "CMND") {
-      newValue = newValue.replace(/\D/g, "");
-    }
-
-    setValue(newValue);
-
-    // Notify parent component about the value change
-    if (onChange) {
-      onChange(newValue, name);
-    }
-  }, [type, onChange, name]);
-
   return (
     <Box className="form-field">
       <Typography
@@ -48,17 +23,30 @@ export const FormField = memo(({
         sx={{ mb: 0.5, fontWeight: 500 }}>
         {label}
       </Typography>
-      <TextField
-        fullWidth
-        size="small"
-        // value={value}
+      <Controller
         name={name}
-        type={type === "CMND" ? "text" : type}
-        onChange={handleChange}
-        disabled={disabled}
-        sx={{
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d0d0d0" },
-        }}
+        control={control}
+        render={({ field, fieldState: { error } }) => (
+          <TextField
+            {...field}
+            fullWidth
+            size="small"
+            type={type === "CMND" ? "text" : type}
+            disabled={disabled}
+            error={!!error}
+            helperText={error?.message}
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d0d0d0" },
+            }}
+            onChange={(e) => {
+              let newValue = e.target.value;
+              if (type === "CMND") {
+                newValue = newValue.replace(/\D/g, "");
+              }
+              field.onChange(newValue);
+            }}
+          />
+        )}
       />
     </Box>
   );
